@@ -1,0 +1,79 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T08:00:17.998Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 3,
+    "implemented": 3,
+    "items": [
+      {
+        "id": "REQ-22",
+        "summary": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest",
+          "frontend/src/pwa/registerServiceWorker.ts",
+          "frontend/src/main.tsx",
+          "frontend/public/sw.js"
+        ],
+        "matchedFiles": [
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest",
+          "frontend/src/pwa/registerServiceWorker.ts",
+          "frontend/public/sw.js"
+        ]
+      },
+      {
+        "id": "REQ-23",
+        "summary": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/sw.js",
+          "frontend/src/pwa/registerServiceWorker.ts",
+          "frontend/src/pages/WatchPage.tsx",
+          "frontend/src/components/VideoPlayer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/public/sw.js",
+          "frontend/src/pwa/registerServiceWorker.ts",
+          "frontend/src/pages/WatchPage.tsx",
+          "frontend/src/components/VideoPlayer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-24",
+        "summary": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/public/manifest.webmanifest",
+          "frontend/index.html"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/sw.js",
+    "frontend/src/components/VideoPlayer.tsx",
+    "frontend/src/pages/WatchPage.tsx",
+    "frontend/src/pwa/registerServiceWorker.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

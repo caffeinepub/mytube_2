@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 36,
+  "summary": "Build a YouTube-like video sharing/streaming platform app named \"mytube\" with similar core features and system functionality (not an identical clone; only the name differs).",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Core mytube frontend shell, navigation, and theming",
+      "synonyms": [
+        "App shell",
+        "Layout",
+        "Header/Sidebar",
+        "Theme"
+      ],
+      "description": "Implements the core UI structure and navigation for a YouTube-like experience, including header (brand mark, search, auth controls), left sidebar navigation (Home, Following, Upload, Library), and a coherent mytube visual theme (dark base with teal/coral accents) applied across pages.",
+      "reqIds": [
+        "REQ-1",
+        "REQ-7",
+        "REQ-9",
+        "REQ-11",
+        "REQ-14",
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Internet Identity authentication with principal-based user identity",
+      "synonyms": [
+        "II auth",
+        "Auth"
+      ],
+      "description": "Integrates Internet Identity login/logout and uses the authenticated principal as the user identifier for all user-scoped actions (uploads, likes, comments, following, profile updates).",
+      "reqIds": [
+        "REQ-2",
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Backend video upload, storage, and streaming via single Motoko actor",
+      "synonyms": [
+        "Chunked upload",
+        "Video storage"
+      ],
+      "description": "Implements chunked video upload to the backend, persistent storage of uploaded bytes/chunks, creation of video metadata (title, description, createdAt, uploader principal), and retrieval/streaming of stored bytes for frontend playback.",
+      "reqIds": [
+        "REQ-3",
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Video browsing, search, and watch flows",
+      "synonyms": [
+        "Home feed",
+        "Search",
+        "Watch page"
+      ],
+      "description": "Implements home feed browsing and searching, plus a watch page with a player and video detail presentation (title/description/channel card) to support the core view experience.",
+      "reqIds": [
+        "REQ-1",
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Video interactions: likes, comments, and view counts",
+      "synonyms": [
+        "Engagement"
+      ],
+      "description": "Adds core interactions including like/unlike with counts, comment creation and listing, and view count incrementing with basic de-duplication behavior on watch page open.",
+      "reqIds": [
+        "REQ-4",
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Channel pages and minimal user profile editor",
+      "synonyms": [
+        "Uploader channel",
+        "Profile"
+      ],
+      "description": "Implements channel-like pages for uploaders showing profile info and uploaded videos, plus a minimal profile editor for authenticated users (display name and optional avatar).",
+      "reqIds": [
+        "REQ-5",
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Following (subscriptions) system and Following feed using “Follow” copy",
+      "synonyms": [
+        "Subscriptions",
+        "Follow/Unfollow",
+        "Following feed"
+      ],
+      "description": "Implements follow/unfollow for channels and a Following feed showing recent videos from followed channels; updates UI copy from “Subscribe” to “Follow” wherever applicable.",
+      "reqIds": [
+        "REQ-6",
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Library page for user video collections",
+      "synonyms": [
+        "My library"
+      ],
+      "description": "Provides a basic Library experience for authenticated users, including access to their uploaded videos and liked videos.",
+      "reqIds": [
+        "REQ-7",
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "React Query data layer with cache invalidation for all major operations",
+      "synonyms": [
+        "TanStack Query"
+      ],
+      "description": "Uses React Query for backend data fetching and mutations (feeds, search, video details, uploads, likes/comments/following, profile updates) with cache invalidation to keep counts and lists consistent after actions.",
+      "reqIds": [
+        "REQ-8",
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Branding integration and generated icon pipeline hooks",
+      "synonyms": [
+        "Logo integration",
+        "Icons",
+        "Favicon/PWA icons"
+      ],
+      "description": "Integrates the mytube brand mark in the UI and includes build-template tooling/scripts to support generating and integrating favicon/app icons derived from the uploaded logo under the expected public assets locations.",
+      "reqIds": [
+        "REQ-10",
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "YouTube-like Settings experience (in-app navigation + settings pages)",
+      "synonyms": [
+        "Settings page",
+        "Settings navigation",
+        "App settings"
+      ],
+      "description": "Adds a Settings entry point (button/link in the app UI) and a YouTube-like Settings experience within mytube, including settings navigation and multiple settings sections/pages implemented in the frontend (SettingsPage and supporting UI). Settings remain global (not per-user) per prior scope decision.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Installable PWA support (manifest + service worker + offline UX)",
+      "synonyms": [
+        "PWA",
+        "Add to Home Screen",
+        "Service worker",
+        "Offline support"
+      ],
+      "description": "Adds PWA installability and a mobile-friendly install experience via a web app manifest and service worker. Includes generated PWA icons (including maskable variants) and basic offline UX signaling (online/offline status detection and banner).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-retry-the-same-full-pwa-build-for-mytube-and-resolve-the-underlying-failure-that-resulted-in-the-platform-error-application-creation-unsuccessful-so-the-app-build-completes-successfully",
+      "title": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-existing-pwa-support-functions-as-a-full-pwa-by-providing-offline-caching-for-app-shell-pages-thumbnails-and-video-metadata-but-not-full-video-files-and-verify-that-behavior-works-after-the-build-is-fixed",
+      "title": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-the-pwa-manifest-references-the-existing-generated-app-icons-and-that-the-icons-render-correctly-on-mobile-home-screens-and-app-switcher-task-switcher-surfaces",
+      "title": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [],
+  "architectural_notes": [
+    "Scope adjustment: build a YouTube-like app with similar core features rather than an exact 1:1 clone of YouTube.",
+    "User confirmed the uploaded image should be used as the official mytube logo in the header and app icons; minor changes to the logo/branding assets are acceptable.",
+    "User revised scope from an identical YouTube clone to a \"somewhat similar\" YouTube-style app; minor differences from YouTube are acceptable.",
+    "User requested the entire app be production-ready/ready for use and that all existing planned features work correctly (stability/QA focus).",
+    "Frontend implemented with React + Vite + Tailwind, using shadcn/ui component set for consistent UI primitives.",
+    "Data fetching/mutations standardized on React Query with explicit cache invalidation patterns after write actions.",
+    "Authentication integrated via Internet Identity and principal-driven identity is threaded through user-scoped operations.",
+    "Backend uses a single Motoko canister actor to manage video bytes (chunked upload) and associated metadata.",
+    "Settings scope clarification: user wants a broad, YouTube-like Settings experience with \"a little bit of everything\" (multiple sections rather than a single minimal settings page).",
+    "Settings persistence decision: settings are global (same for everyone), not saved per-user in the backend."
+  ],
+  "known_issues": [
+    "PWA conversion/build attempt failed with \"Application creation unsuccessful\"; user confirmed to retry the PWA build/run again."
+  ],
+  "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+      "description": "Generated Apple touch icon for PWA/mobile home screen.",
+      "targetWidth": 180,
+      "targetHeight": 180
+    },
+    {
+      "filename": "frontend/public/assets/generated/favicon.dim_48x48.png",
+      "description": "Generated favicon image.",
+      "targetWidth": 48,
+      "targetHeight": 48
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+      "description": "Generated PWA app icon.",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+      "description": "Generated PWA app icon.",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
+      "description": "Generated maskable PWA icon.",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+      "description": "Generated maskable PWA icon.",
+      "targetWidth": 512,
+      "targetHeight": 512
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "mytube",
+  "clarification_mode": "thinking",
+  "clarification_rounds": 0
+}

@@ -1,0 +1,66 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-retry-the-same-full-pwa-build-for-mytube-and-resolve-the-underlying-failure-that-resulted-in-the-platform-error-application-creation-unsuccessful-so-the-app-build-completes-successfully",
+      "featureTitle": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+      "files": [
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest",
+        "frontend/public/sw.js",
+        "frontend/src/pwa/registerServiceWorker.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-existing-pwa-support-functions-as-a-full-pwa-by-providing-offline-caching-for-app-shell-pages-thumbnails-and-video-metadata-but-not-full-video-files-and-verify-that-behavior-works-after-the-build-is-fixed",
+      "featureTitle": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+      "files": [
+        "frontend/public/sw.js",
+        "frontend/src/components/VideoPlayer.tsx",
+        "frontend/src/pages/WatchPage.tsx",
+        "frontend/src/pwa/registerServiceWorker.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-23"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-that-the-pwa-manifest-references-the-existing-generated-app-icons-and-that-the-icons-render-correctly-on-mobile-home-screens-and-app-switcher-task-switcher-surfaces",
+      "featureTitle": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+      "files": [
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-24"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

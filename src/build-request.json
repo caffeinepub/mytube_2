@@ -1,0 +1,75 @@
+{
+  "kind": "build_request",
+  "title": "Fix failed full PWA build and successfully enable installable offline-capable mytube",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "text": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+      "target": "unknown",
+      "source": {
+        "messageIds": [
+          "msg-18",
+          "msg-20"
+        ],
+        "quotes": [
+          "yes",
+          "Great — I’ll retry the same full PWA build now."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The project build completes without the \"Application creation unsuccessful\" failure.",
+        "The app can be opened in a mobile browser without runtime errors after the successful build."
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-14"
+        ],
+        "quotes": [
+          "full pwa"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A web app manifest is present and valid, and the app is installable on mobile (Add to Home Screen).",
+        "A service worker is registered successfully in supported browsers.",
+        "When offline, previously visited pages still load (app shell + routed UI).",
+        "When offline, previously fetched thumbnails and video metadata remain available (where previously cached), while video playback gracefully indicates unavailable content if the video bytes were not cached."
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "text": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-14"
+        ],
+        "quotes": [
+          "full pwa"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The manifest uses the existing generated icon files under frontend/public/assets/generated/ (including maskable icons).",
+        "Installed PWA shows the correct app icon on iOS and Android (including maskable rendering where supported)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Respect the single-actor backend architecture; do not introduce additional backend services.",
+    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths; compose those components instead.",
+    "Use English for any user-facing text."
+  ],
+  "nonGoals": [
+    "Do not implement native iOS/Android builds (no App Store / APK / IPA delivery).",
+    "Do not add offline caching for full video files."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

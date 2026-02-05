@@ -1,0 +1,61 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T08:00:17.962Z",
+  "summary": "The diff adds a PWA manifest, a service worker script with offline caching strategies, and a TS helper for service worker registration. It also adds offline UI handling on the watch/player experience. However, the build-failure root cause (REQ-22) is not evidenced as fixed, and caching for video metadata is not clearly implemented because the service worker explicitly bypasses canister/API calls.",
+  "missing_requirements": [
+    {
+      "id": "REQ-22",
+      "requirement": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+      "reason": "The diff shows PWA-related additions but does not show any change that addresses the underlying platform/build failure (no build pipeline/config/runtime error fix is evidenced).",
+      "evidence": [
+        "file-diff summary shows only frontend PWA assets and UI changes (frontend/public/sw.js, frontend/public/manifest.webmanifest, frontend/index.html, frontend/src/pwa/registerServiceWorker.ts, frontend/src/components/VideoPlayer.tsx, frontend/src/pages/WatchPage.tsx)"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "requirement": "Provide offline caching for app shell/pages, thumbnails, and video metadata (but not full video files).",
+      "reason": "The service worker explicitly skips caching/bypasses API calls to Internet Computer canisters, which is where video metadata would typically be fetched from; the diff does not show an alternative metadata caching mechanism (e.g., caching JSON responses or storing metadata in IndexedDB).",
+      "evidence": [
+        "frontend/public/sw.js (\"Skip API calls to Internet Computer canisters (let them go through)\")"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "requirement": "A service worker is registered successfully in supported browsers.",
+      "reason": "A registration helper is added, but the diff summary does not include the actual wiring/usage (e.g., calling registerServiceWorker() from the app entrypoint). The file list hints main.tsx changes but its content is truncated and not shown as evidence.",
+      "evidence": [
+        "frontend/src/pwa/registerServiceWorker.ts",
+        "frontend-file-summaries.txt (mentions frontend/src/main.tsx is truncated: \"registers the service w...\")"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Added service worker utility functions (unregisterServiceWorker, isStandalone, isOffline) and updatefound logging that are not explicitly requested by the BuildRequest.",
+      "reason": "The BuildRequest asks for successful PWA/offline behavior and installability, but does not request debug utilities or standalone/offline helper APIs.",
+      "evidence": [
+        "frontend/src/pwa/registerServiceWorker.ts"
+      ]
+    },
+    {
+      "description": "Added/expanded offline UI behavior on WatchPage and VideoPlayer (offline banner + placeholder messaging).",
+      "reason": "REQ-23 requires graceful handling when video bytes are not cached; the specific banner + placeholder implementation details are not explicitly requested (though they align with the acceptance criteria).",
+      "evidence": [
+        "frontend/src/pages/WatchPage.tsx",
+        "frontend/src/components/VideoPlayer.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.66,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/sw.js",
+    "frontend/src/components/VideoPlayer.tsx",
+    "frontend/src/pages/WatchPage.tsx",
+    "frontend/src/pwa/registerServiceWorker.ts",
+    "project_state.json"
+  ]
+}

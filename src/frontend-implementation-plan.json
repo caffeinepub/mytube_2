@@ -1,0 +1,94 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix full PWA build failure and enable installable offline-capable mytube (frontend-only)",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "summary": "Resolve the full PWA build failure by adding the missing/invalid PWA build inputs (manifest + service worker registration) and ensuring the app loads without runtime errors.",
+      "acceptanceCriteria": [
+        "The project build completes without the \"Application creation unsuccessful\" failure.",
+        "The app can be opened in a mobile browser without runtime errors after the successful build."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Add required PWA document wiring (manifest link and basic PWA meta tags) so the build output includes installability primitives and avoids platform PWA validation failures."
+        },
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "create",
+          "description": "Add a valid Web App Manifest file with required fields (name, short_name, start_url, display, theme_color/background_color) to satisfy full PWA build requirements."
+        },
+        {
+          "path": "frontend/src/pwa/registerServiceWorker.ts",
+          "operation": "create",
+          "description": "Add a small service worker registration helper (including safe guards for unsupported browsers and dev mode) to prevent runtime errors and ensure consistent registration behavior."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Wire the service worker registration into app startup using the new helper, ensuring registration failures do not break the app and are handled gracefully."
+        },
+        {
+          "path": "frontend/public/sw.js",
+          "operation": "create",
+          "description": "Add a production-ready service worker file (no framework/plugin dependency) that supports offline navigation fallback and runtime caching; ensure it does not cache full video bytes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Implement full PWA offline caching for app shell/pages, thumbnails, and video metadata (excluding full video files) and ensure offline behavior matches requirements.",
+      "acceptanceCriteria": [
+        "A web app manifest is present and valid, and the app is installable on mobile (Add to Home Screen).",
+        "A service worker is registered successfully in supported browsers.",
+        "When offline, previously visited pages still load (app shell + routed UI).",
+        "When offline, previously fetched thumbnails and video metadata remain available (where previously cached), while video playback gracefully indicates unavailable content if the video bytes were not cached."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/sw.js",
+          "operation": "modify",
+          "description": "Implement offline strategies: (1) cache app shell/navigation requests with an SPA fallback to the cached HTML for routed pages, (2) runtime cache thumbnails/images with a cache-first policy, (3) runtime cache video metadata (JSON/fetch responses) with stale-while-revalidate, and (4) explicitly bypass caching for video media requests (e.g., requests with destination 'video' or obvious video file extensions) so full video files are never cached."
+        },
+        {
+          "path": "frontend/src/pwa/registerServiceWorker.ts",
+          "operation": "modify",
+          "description": "Add lightweight telemetry/logging hooks (non-blocking) to confirm successful registration/updates and to support verification of offline readiness without introducing runtime errors."
+        },
+        {
+          "path": "frontend/src/pages/WatchPage.tsx",
+          "operation": "modify",
+          "description": "Ensure video playback UX is graceful when offline and video bytes are unavailable (e.g., show an English offline/unavailable message in the watch experience while still rendering cached metadata/thumbnails when available)."
+        },
+        {
+          "path": "frontend/src/components/VideoPlayer.tsx",
+          "operation": "modify",
+          "description": "Adjust the player placeholder to detect offline state and present an English, user-friendly unavailable message when the video cannot be fetched, without attempting to cache or fetch full video files while offline."
+        }
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "summary": "Update the web app manifest to reference the existing generated app icons (including maskable variants) so installed icons render correctly on mobile surfaces.",
+      "acceptanceCriteria": [
+        "The manifest uses the existing generated icon files under frontend/public/assets/generated/ (including maskable icons).",
+        "Installed PWA shows the correct app icon on iOS and Android (including maskable rendering where supported)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "modify",
+          "description": "Populate the manifest 'icons' array to reference the existing generated icon files under frontend/public/assets/generated/ (including at least one 'maskable' purpose icon) and ensure sizes/types are correct."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Add iOS-friendly install metadata (e.g., apple-mobile-web-app-capable and related meta/link tags as appropriate) so icons/launch behavior render correctly across iOS and Android when installed."
+        }
+      ]
+    }
+  ]
+}
