@@ -1,7 +1,63 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 36,
+  "projectStateVersion": 77,
   "summary": "Build a YouTube-like video sharing/streaming platform app named \"mytube\" with similar core features and system functionality (not an identical clone; only the name differs).",
+  "architectural_notes": [
+    "User confirmed the uploaded image should be used as the official mytube logo in the header and app icons; minor changes to the logo/branding assets are acceptable.",
+    "User requested the entire app be production-ready/ready for use and that all existing planned features work correctly (stability/QA focus).",
+    "Frontend implemented with React + Vite + Tailwind, using shadcn/ui component set for consistent UI primitives.",
+    "Data fetching/mutations standardized on React Query with explicit cache invalidation patterns after write actions.",
+    "Authentication integrated via Internet Identity and principal-driven identity is threaded through user-scoped operations.",
+    "Backend uses a single Motoko canister actor to manage video bytes (chunked upload) and associated metadata.",
+    "Settings scope clarification: user wants a broad, YouTube-like Settings experience with \"a little bit of everything\" (multiple sections rather than a single minimal settings page).",
+    "Mood AI is implemented as a principal-scoped (per-user) setting persisted in the backend; this is an exception to other global-only settings.",
+    "Authorization layer updated/refactored using centralized access-control + MixinAuthorization modules (component:authorization v4.0.0).",
+    "Build/deployment template added/updated for reproducible ICP builds/deploys (Dockerfile, icp.yaml, deploy.sh, canister.yaml, workspace package setup)."
+  ],
+  "known_issues": [
+    "PWA conversion/build attempt failed with \"Application creation unsuccessful\"; user confirmed to retry the PWA build/run again.",
+    "Mobile UI bug: search option/logo overlaps the app logo in the header; needs layout/alignment fix.",
+    "Build/implementation attempts for the 4K–8K upload/playback feature failed with errors like \"AI couldn't process/implement that\"; needs retry or decomposition into smaller tasks."
+  ],
+  "isFixRequest": false,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+      "description": "Generated Apple touch icon for PWA/mobile home screen.",
+      "targetWidth": 180,
+      "targetHeight": 180
+    },
+    {
+      "filename": "frontend/public/assets/generated/favicon.dim_48x48.png",
+      "description": "Generated favicon image.",
+      "targetWidth": 48,
+      "targetHeight": 48
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+      "description": "Generated PWA app icon.",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+      "description": "Generated PWA app icon.",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
+      "description": "Generated maskable PWA icon.",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
+      "description": "Generated maskable PWA icon.",
+      "targetWidth": 512,
+      "targetHeight": 512
+    }
+  ],
   "existing_features": [
     {
       "id": "IF-1",
@@ -175,83 +231,210 @@
       "version": 1
     },
     {
-      "id": "feature-retry-the-same-full-pwa-build-for-mytube-and-resolve-the-underlying-failure-that-resulted-in-the-platform-error-application-creation-unsuccessful-so-the-app-build-completes-successfully",
-      "title": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+      "id": "IF-13",
+      "title": "Short-form videos (Shorts-like) upload and viewing experience",
+      "synonyms": [
+        "Shorts",
+        "Short-form video",
+        "Vertical video feed"
+      ],
+      "description": "Adds a short-form video mode with dedicated routes/pages for uploading short videos and viewing them in a Shorts-like experience (ShortsPage + UploadShortPage), integrated into the existing app shell/navigation and backend video storage/metadata flow.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "Per-user Mood AI preferences (backend + auth-gated APIs)",
+      "synonyms": [
+        "Mood AI settings storage",
+        "Principal-scoped mood preference"
+      ],
+      "description": "Adds backend support for a signed-in user to enable/disable Mood AI and store/select their current mood, scoped to the caller principal. Includes updated authorization/access-control and migration wiring to support the new user-scoped preference APIs safely.",
       "reqIds": [
         "REQ-22"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-the-existing-pwa-support-functions-as-a-full-pwa-by-providing-offline-caching-for-app-shell-pages-thumbnails-and-video-metadata-but-not-full-video-files-and-verify-that-behavior-works-after-the-build-is-fixed",
-      "title": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+      "id": "IF-15",
+      "title": "Mood-tagged Shorts metadata and backend recommendations query",
+      "synonyms": [
+        "Mood tags",
+        "Recommended shorts API"
+      ],
+      "description": "Extends Shorts/video metadata to support associating shorts with one or more mood tags and provides a backend query to fetch recommended shorts for the caller based on the caller’s Mood AI preferences.",
       "reqIds": [
         "REQ-23"
       ],
       "version": 1
     },
     {
-      "id": "feature-verify-that-the-pwa-manifest-references-the-existing-generated-app-icons-and-that-the-icons-render-correctly-on-mobile-home-screens-and-app-switcher-task-switcher-surfaces",
-      "title": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+      "id": "IF-16",
+      "title": "Mood AI Settings UI section (per-user)",
+      "synonyms": [
+        "Mood AI settings page",
+        "Settings > Mood AI"
+      ],
+      "description": "Adds a dedicated Settings UI section for Mood AI that lets a signed-in user enable/disable Mood AI and select their current mood (English UI copy), integrated into the existing Settings experience.",
       "reqIds": [
         "REQ-24"
       ],
       "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Mood-based recommendations integrated into Shorts feed",
+      "synonyms": [
+        "Personalized Shorts feed",
+        "Recommended Shorts"
+      ],
+      "description": "Integrates mood-based recommendations into the Shorts viewing experience so that when Mood AI is enabled and a mood is selected, the Shorts feed prioritizes/replaces the list with recommended shorts for that signed-in user.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-youtube-style-bottom-navigation-bar-for-mobile-that-includes-these-routes-home-shorts-shorts-following-following-upload-upload-library-library-settings-settings-show-it-on-small-screens-and-keep-the-existing-left-sidebar-navigation-for-desktop-md-and-up",
+      "title": "Add a YouTube-style bottom navigation bar for mobile that includes these routes: Home (/), Shorts (/shorts), Following (/following), Upload (/upload), Library (/library), Settings (/settings). Show it on small screens and keep the existing left Sidebar navigation for desktop (md and up).",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-mobile-header-layout-so-the-search-ui-does-not-overlap-the-mytube-logo-on-mobile-the-search-control-must-be-right-aligned-in-the-top-bar-icon-button-while-desktop-can-keep-the-full-search-input-in-the-header",
+      "title": "Fix the mobile header layout so the search UI does not overlap the mytube logo. On mobile, the search control must be right-aligned in the top bar (icon/button), while desktop can keep the full search input in the header.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-overall-mobile-layout-composition-so-that-1-the-left-sidebar-does-not-take-space-on-mobile-2-the-bottom-nav-is-always-reachable-and-3-scrolling-behavior-remains-correct-header-sticky-content-scrolls-bottom-nav-fixed",
+      "title": "Update the overall mobile layout composition so that: (1) the left Sidebar does not take space on mobile, (2) the bottom nav is always reachable, and (3) scrolling behavior remains correct (header sticky, content scrolls, bottom nav fixed).",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-simulated-upload-behavior-on-the-upload-page-with-a-real-upload-that-sends-the-selected-file-to-the-backend-using-chunked-upload-while-keeping-internet-identity-sign-in-gating",
+      "title": "Replace the simulated upload behavior on the Upload page with a real upload that sends the selected file to the backend using chunked upload, while keeping Internet Identity sign-in gating.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-real-video-playback-in-the-videoplayer-watch-flow-using-the-backend-stored-video-data-and-ensure-the-ui-clearly-indicates-when-a-video-is-high-resolution-e-g-hd-4k-8k-based-on-available-metadata",
+      "title": "Implement real video playback in the VideoPlayer/Watch flow using the backend-stored video data and ensure the UI clearly indicates when a video is high-resolution (e.g., HD/4K/8K) based on available metadata.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-long-form-video-uploads-and-playback-are-supported-end-to-end-full-movie-length-without-introducing-frontend-validation-that-blocks-long-durations-solely-due-to-length",
+      "title": "Ensure long-form video uploads and playback are supported end-to-end (\"full movie\" length), without introducing frontend validation that blocks long durations solely due to length.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-global-header-frontend-src-components-header-tsx-to-include-a-youtube-style-notifications-bell-control-and-a-profile-account-control-positioned-next-to-the-search-ui-and-render-these-controls-on-both-mobile-and-desktop",
+      "title": "Update the global header (frontend/src/components/Header.tsx) to include a YouTube-style notifications (bell) control and a profile/account control positioned next to the search UI, and render these controls on both mobile and desktop.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-notifications-dropdown-panel-opened-from-the-bell-icon-that-lists-notification-items-for-the-categories-comments-likes-and-followers",
+      "title": "Add a notifications dropdown/panel opened from the bell icon that lists notification items for the categories: comments, likes, and followers.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-minimal-non-breaking-notifications-data-source-for-the-new-ui-so-the-notifications-panel-can-render-without-backend-changes-e-g-in-memory-or-localstorage-and-ensure-it-only-shows-user-specific-notifications-when-the-user-is-signed-in",
+      "title": "Provide a minimal, non-breaking notifications data source for the new UI so the notifications panel can render without backend changes (e.g., in-memory or localStorage), and ensure it only shows user-specific notifications when the user is signed in.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "architectural_notes": [
-    "Scope adjustment: build a YouTube-like app with similar core features rather than an exact 1:1 clone of YouTube.",
-    "User confirmed the uploaded image should be used as the official mytube logo in the header and app icons; minor changes to the logo/branding assets are acceptable.",
-    "User revised scope from an identical YouTube clone to a \"somewhat similar\" YouTube-style app; minor differences from YouTube are acceptable.",
-    "User requested the entire app be production-ready/ready for use and that all existing planned features work correctly (stability/QA focus).",
-    "Frontend implemented with React + Vite + Tailwind, using shadcn/ui component set for consistent UI primitives.",
-    "Data fetching/mutations standardized on React Query with explicit cache invalidation patterns after write actions.",
-    "Authentication integrated via Internet Identity and principal-driven identity is threaded through user-scoped operations.",
-    "Backend uses a single Motoko canister actor to manage video bytes (chunked upload) and associated metadata.",
-    "Settings scope clarification: user wants a broad, YouTube-like Settings experience with \"a little bit of everything\" (multiple sections rather than a single minimal settings page).",
-    "Settings persistence decision: settings are global (same for everyone), not saved per-user in the backend."
-  ],
-  "known_issues": [
-    "PWA conversion/build attempt failed with \"Application creation unsuccessful\"; user confirmed to retry the PWA build/run again."
-  ],
-  "isFixRequest": true,
-  "generatedImages": [
+  "new_feature_requests": [
     {
-      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
-      "description": "Generated Apple touch icon for PWA/mobile home screen.",
-      "targetWidth": 180,
-      "targetHeight": 180
+      "id": "AR-1",
+      "summary": "Add an in-app AI feature/assistant to help manage and automate app tasks/management (\"AI jo sab kuch management kare app ko\").",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/favicon.dim_48x48.png",
-      "description": "Generated favicon image.",
-      "targetWidth": 48,
-      "targetHeight": 48
+      "id": "AR-2",
+      "summary": "Add Hindi language support for the app (UI/localization) so users can use the app in Hindi.",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-      "description": "Generated PWA app icon.",
-      "targetWidth": 192,
-      "targetHeight": 192
+      "id": "AR-3",
+      "summary": "AI automation (admin-enabled) that understands a user’s mood and recommends/plays suitable videos accordingly (mood-based personalization).",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-      "description": "Generated PWA app icon.",
-      "targetWidth": 512,
-      "targetHeight": 512
+      "id": "AR-8",
+      "summary": "Implement Mood AI mood-detection using combined signals from a user’s watch pattern, likes, and in-app activity (to infer mood for recommendations when admin-enabled).",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_192x192.png",
-      "description": "Generated maskable PWA icon.",
-      "targetWidth": 192,
-      "targetHeight": 192
+      "id": "AR-9",
+      "summary": "Provide a downloadable/installed-app option for mytube (e.g., users can download/install the app on their device, not only use it via the live website).",
+      "reqIds": [],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/pwa-icon-maskable.dim_512x512.png",
-      "description": "Generated maskable PWA icon.",
-      "targetWidth": 512,
-      "targetHeight": 512
+      "id": "AR-10",
+      "summary": "Expand/augment user profile functionality (user requested: \"add user prof...\").",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Update mobile UI to use a YouTube-style bottom navigation bar with buttons: Home, Shorts, Following, Upload, Library, Settings (move these from side menu to bottom on mobile).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Fix mobile header layout issue where the search option/logo overlaps the mytube logo; align search button in the top bar right side (Option B).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Support high-resolution video uploads and playback up to 8K (4K–8K), including full-movie uploads, with unlimited file size and technical support only (no copyright/age restrictions).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Extend the Motoko backend video model and APIs to support storing and serving high-resolution videos (4K–8K) and long-form uploads by using chunked upload and streamed retrieval from the single main actor.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add YouTube-style header controls: profile/avatar icon and notifications (bell) next to/right-aligned with the search UI in the global header on both mobile and desktop; notifications should cover comments, likes, and followers (at least as initial UI/placeholder and later as real notifications).",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",

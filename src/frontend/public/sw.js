@@ -1,13 +1,17 @@
 const CACHE_NAME = 'mytube-v1';
 const RUNTIME_CACHE = 'mytube-runtime-v1';
 
-// Assets to cache on install
+// Assets to cache on install - only deployable URLs
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/src/main.tsx',
-  '/src/index.css',
-  '/manifest.webmanifest'
+  '/manifest.webmanifest',
+  '/assets/generated/pwa-icon.dim_192x192.png',
+  '/assets/generated/pwa-icon.dim_512x512.png',
+  '/assets/generated/pwa-icon-maskable.dim_192x192.png',
+  '/assets/generated/pwa-icon-maskable.dim_512x512.png',
+  '/assets/generated/apple-touch-icon.dim_180x180.png',
+  '/assets/generated/favicon.dim_48x48.png'
 ];
 
 // Install event - precache essential assets

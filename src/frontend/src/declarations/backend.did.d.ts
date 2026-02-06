@@ -10,7 +10,110 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export type Mood = { 'sad' : null } |
+  { 'happy' : null } |
+  { 'chill' : null } |
+  { 'excited' : null };
+export interface Short {
+  'moods' : Array<Mood>,
+  'title' : string,
+  'duration' : bigint,
+  'likes' : bigint,
+  'videoUrl' : string,
+}
+export interface StreamChunk {
+  'chunkNumber' : bigint,
+  'data' : Uint8Array,
+  'size' : bigint,
+}
+export interface UserPreferences {
+  'moodAIEnabled' : boolean,
+  'currentMood' : Mood,
+}
+export interface UserProfile {
+  'bio' : string,
+  'username' : string,
+  'twitter' : string,
+  'displayName' : string,
+  'instagram' : string,
+  'website' : string,
+  'facebook' : string,
+  'youtube' : string,
+  'bannerUrl' : string,
+  'profilePhotoUrl' : string,
+}
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export type VideoId = string;
+export interface VideoMetadata {
+  'id' : VideoId,
+  'title' : string,
+  'description' : string,
+  'uploadTimestamp' : bigint,
+  'resolution' : string,
+  'totalChunks' : bigint,
+  'durationSeconds' : bigint,
+  'chunkSize' : bigint,
+  'uploadedBy' : Principal,
+}
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
+export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addShort' : ActorMethod<[string, string, bigint, Array<Mood>], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getMoodHistory' : ActorMethod<[], Array<Mood>>,
+  'getMoodPreferences' : ActorMethod<[], UserPreferences>,
+  'getRecommendedShorts' : ActorMethod<[], Array<Short>>,
+  'getShorts' : ActorMethod<[], Array<Short>>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getVideoMetadata' : ActorMethod<[VideoId], VideoMetadata>,
+  'getVideoMetadataList' : ActorMethod<[], Array<VideoMetadata>>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'recordMood' : ActorMethod<[Mood], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'streamVideo' : ActorMethod<
+    [VideoId, bigint, bigint],
+    { 'error' : string } |
+      { 'chunks' : Array<StreamChunk> }
+  >,
+  'updateMoodPreferences' : ActorMethod<[boolean, Mood], undefined>,
+  'uploadVideoChunk' : ActorMethod<
+    [VideoId, bigint, Uint8Array, bigint],
+    undefined
+  >,
+  'uploadVideoMetadata' : ActorMethod<
+    [VideoId, string, string, bigint, string, bigint, bigint, bigint],
+    undefined
+  >,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;

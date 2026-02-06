@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T08:00:17.998Z",
+  "generatedAt": "2026-02-06T12:00:22.003Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,51 +11,46 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-22",
-        "summary": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
+        "id": "REQ-33",
+        "summary": "Update the global header (frontend/src/components/Header.tsx) to include a YouTube-style notifications (bell) control and a profile/account control positioned next to the search UI, and render these controls on both mobile and desktop.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html",
-          "frontend/public/manifest.webmanifest",
-          "frontend/src/pwa/registerServiceWorker.ts",
-          "frontend/src/main.tsx",
-          "frontend/public/sw.js"
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/account/ProfileMenu.tsx"
         ],
         "matchedFiles": [
-          "frontend/index.html",
-          "frontend/public/manifest.webmanifest",
-          "frontend/src/pwa/registerServiceWorker.ts",
-          "frontend/public/sw.js"
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/account/ProfileMenu.tsx"
         ]
       },
       {
-        "id": "REQ-23",
-        "summary": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+        "id": "REQ-34",
+        "summary": "Add a notifications dropdown/panel opened from the bell icon that lists notification items for the categories: comments, likes, and followers.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/sw.js",
-          "frontend/src/pwa/registerServiceWorker.ts",
-          "frontend/src/pages/WatchPage.tsx",
-          "frontend/src/components/VideoPlayer.tsx"
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/Header.tsx"
         ],
         "matchedFiles": [
-          "frontend/public/sw.js",
-          "frontend/src/pwa/registerServiceWorker.ts",
-          "frontend/src/pages/WatchPage.tsx",
-          "frontend/src/components/VideoPlayer.tsx"
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/Header.tsx"
         ]
       },
       {
-        "id": "REQ-24",
-        "summary": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+        "id": "REQ-35",
+        "summary": "Provide a minimal, non-breaking notifications data source for the new UI so the notifications panel can render without backend changes (e.g., in-memory or localStorage), and ensure it only shows user-specific notifications when the user is signed in.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
+          "frontend/src/hooks/useNotifications.ts",
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/Header.tsx"
         ],
         "matchedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
+          "frontend/src/hooks/useNotifications.ts",
+          "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "frontend/src/components/Header.tsx"
         ]
       }
     ]
@@ -65,12 +60,10 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/sw.js",
-    "frontend/src/components/VideoPlayer.tsx",
-    "frontend/src/pages/WatchPage.tsx",
-    "frontend/src/pwa/registerServiceWorker.ts",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/account/ProfileMenu.tsx",
+    "frontend/src/components/notifications/NotificationsDropdown.tsx",
+    "frontend/src/hooks/useNotifications.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

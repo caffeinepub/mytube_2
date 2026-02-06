@@ -1,75 +1,88 @@
 {
   "kind": "build_request",
-  "title": "Fix failed full PWA build and successfully enable installable offline-capable mytube",
-  "priority": "high",
+  "title": "Add YouTube-style profile and notifications controls next to search in the global header (mobile + desktop)",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-22",
-      "text": "Retry the same “full PWA” build for mytube and resolve the underlying failure that resulted in the platform error \"Application creation unsuccessful\" so the app build completes successfully.",
-      "target": "unknown",
-      "source": {
-        "messageIds": [
-          "msg-18",
-          "msg-20"
-        ],
-        "quotes": [
-          "yes",
-          "Great — I’ll retry the same full PWA build now."
-        ]
-      },
-      "acceptanceCriteria": [
-        "The project build completes without the \"Application creation unsuccessful\" failure.",
-        "The app can be opened in a mobile browser without runtime errors after the successful build."
-      ]
-    },
-    {
-      "id": "REQ-23",
-      "text": "Ensure the existing PWA support functions as a “full PWA” by providing offline caching for app shell/pages, thumbnails, and video metadata (but not full video files), and verify that behavior works after the build is fixed.",
+      "id": "REQ-33",
+      "text": "Update the global header (frontend/src/components/Header.tsx) to include a YouTube-style notifications (bell) control and a profile/account control positioned next to the search UI, and render these controls on both mobile and desktop.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-14"
+          "msg-1"
         ],
         "quotes": [
-          "full pwa"
+          "1.  thoda youtube style.  2.  ha dono me bhi.  3. comments, likes, followers)",
+          "build karo"
         ]
       },
       "acceptanceCriteria": [
-        "A web app manifest is present and valid, and the app is installable on mobile (Add to Home Screen).",
-        "A service worker is registered successfully in supported browsers.",
-        "When offline, previously visited pages still load (app shell + routed UI).",
-        "When offline, previously fetched thumbnails and video metadata remain available (where previously cached), while video playback gracefully indicates unavailable content if the video bytes were not cached."
+        "On desktop (md and up), the header shows search input plus right-side actions including: notifications (bell) and profile/account (avatar/user), laid out in a YouTube-like compact style.",
+        "On mobile (below md), the header right side includes the search icon plus notifications and profile/account icons, right-aligned, without overlapping the mytube logo.",
+        "When not signed in, the profile/account control presents a clear Sign In entry point (existing Internet Identity flow) instead of showing user-only menu items.",
+        "Existing header behaviors remain functional: logo navigation, desktop search submission, and mobile search expand/collapse."
       ]
     },
     {
-      "id": "REQ-24",
-      "text": "Verify that the PWA manifest references the existing generated app icons and that the icons render correctly on mobile home screens and app switcher/task switcher surfaces.",
+      "id": "REQ-34",
+      "text": "Add a notifications dropdown/panel opened from the bell icon that lists notification items for the categories: comments, likes, and followers.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-14"
+          "msg-1"
         ],
         "quotes": [
-          "full pwa"
+          "3.comments, likes, followers)"
         ]
       },
       "acceptanceCriteria": [
-        "The manifest uses the existing generated icon files under frontend/public/assets/generated/ (including maskable icons).",
-        "Installed PWA shows the correct app icon on iOS and Android (including maskable rendering where supported)."
+        "Clicking/tapping the bell icon opens a dropdown/panel anchored to the bell button.",
+        "The panel displays a list of notification items with at least: category (comment/like/follower), a short message, and a timestamp (relative time is acceptable).",
+        "If there are no notifications available, the panel shows an empty-state message in English (e.g., \"No notifications yet\").",
+        "The notifications UI is usable on both mobile and desktop (no overflow off-screen; scrolls if long)."
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "text": "Provide a minimal, non-breaking notifications data source for the new UI so the notifications panel can render without backend changes (e.g., in-memory or localStorage), and ensure it only shows user-specific notifications when the user is signed in.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "comments, likes, followers)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When signed in, the notifications dropdown shows a non-empty example list (seed data) for comments, likes, and followers, or previously stored items if present.",
+        "When signed out, the notifications dropdown either (a) shows a sign-in prompt message in English or (b) shows an empty state; it must not error.",
+        "No backend canister interface changes are required for this build; the app compiles and runs with the current backend."
       ]
     }
   ],
   "constraints": [
-    "Respect the single-actor backend architecture; do not introduce additional backend services.",
-    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths; compose those components instead.",
-    "Use English for any user-facing text."
+    "Use English for any user-facing text added/changed by this build request.",
+    "Do not edit files under frontend/src/components/ui (compose existing shadcn components instead).",
+    "Do not edit any frontend immutablePaths listed in SYSTEM_CONTEXT.",
+    "Backend must remain single-actor; do not introduce additional backend services."
   ],
   "nonGoals": [
-    "Do not implement native iOS/Android builds (no App Store / APK / IPA delivery).",
-    "Do not add offline caching for full video files."
+    "Implementing a persistent, backend-driven notifications system (storage, querying, marking as read) is out of scope for this request.",
+    "Adding real push notifications, emails, or real-time delivery is out of scope."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

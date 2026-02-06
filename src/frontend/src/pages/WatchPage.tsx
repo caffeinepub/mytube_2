@@ -4,9 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import VideoPlayer from '@/components/VideoPlayer';
 import CommentSection from '@/components/CommentSection';
 import FollowButton from '@/components/FollowButton';
+import { useMoodSignals } from '../hooks/useMoodSignals';
+import { useGetVideoMetadata } from '../hooks/useQueries';
 import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -17,6 +21,10 @@ export default function WatchPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [watchStartTime] = useState(Date.now());
+
+  const { data: videoMetadata, isLoading: metadataLoading, error: metadataError } = useGetVideoMetadata(videoId);
+  const { recordWatch, recordLike, recordActivity } = useMoodSignals();
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -31,16 +39,21 @@ export default function WatchPage() {
     };
   }, []);
 
-  // Mock data
-  const video = {
-    id: videoId,
-    title: 'Amazing Video Title - You Won\'t Believe What Happens Next!',
+  // Record watch time on unmount
+  useEffect(() => {
+    return () => {
+      const watchDuration = (Date.now() - watchStartTime) / 1000;
+      if (watchDuration > 5) {
+        recordWatch(watchDuration);
+      }
+    };
+  }, [watchStartTime, recordWatch]);
+
+  // Mock data for fields not yet in backend
+  const mockData = {
     channelName: 'Content Creator',
     channelId: 'creator123',
     views: 1234,
-    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    description:
-      'This is an amazing video description that tells you all about the content. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   };
 
   const comments = [
@@ -67,6 +80,7 @@ export default function WatchPage() {
     } else {
       setLikes(likes + 1);
       setIsLiked(true);
+      recordLike();
       if (isDisliked) {
         setDislikes(dislikes - 1);
         setIsDisliked(false);
@@ -88,6 +102,31 @@ export default function WatchPage() {
     }
   };
 
+  const handleShare = () => {
+    recordActivity();
+  };
+
+  const handleFollow = () => {
+    recordActivity();
+  };
+
+  const handleComment = () => {
+    recordActivity();
+  };
+
+  // Helper to get resolution badge
+  const getResolutionBadge = (resolution: string) => {
+    const highRes = ['4K', '8K', '2K'];
+    if (highRes.some(res => resolution.includes(res))) {
+      return (
+        <Badge variant="secondary" className="bg-primary/20 text-primary">
+          {resolution}
+        </Badge>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       {isOffline && (
@@ -101,69 +140,107 @@ export default function WatchPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <VideoPlayer videoId={videoId} title={video.title} isOffline={isOffline} />
+          {metadataLoading ? (
+            <Skeleton className="aspect-video w-full rounded-xl" />
+          ) : metadataError ? (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>
+                Failed to load video metadata. The video may not exist or you may not have permission to view it.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <VideoPlayer
+              videoId={videoId}
+              title={videoMetadata?.title || 'Video'}
+              isOffline={isOffline}
+              metadata={videoMetadata ? {
+                totalChunks: Number(videoMetadata.totalChunks),
+                chunkSize: Number(videoMetadata.chunkSize),
+              } : undefined}
+            />
+          )}
 
           <div className="mt-4 space-y-4">
-            <h1 className="text-xl font-bold">{video.title}</h1>
-
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Link to="/channel/$channelId" params={{ channelId: video.channelId }}>
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-gradient-to-br from-[#d97398] to-[#5fc4d4] text-white">
-                      {video.channelName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Link>
-                <div>
-                  <Link to="/channel/$channelId" params={{ channelId: video.channelId }}>
-                    <p className="font-semibold hover:text-primary">{video.channelName}</p>
-                  </Link>
-                  <p className="text-xs text-muted-foreground">1.2K followers</p>
+            {metadataLoading ? (
+              <>
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-20 w-full" />
+              </>
+            ) : videoMetadata ? (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-xl font-bold">{videoMetadata.title}</h1>
+                  {getResolutionBadge(videoMetadata.resolution)}
                 </div>
-                <FollowButton channelId={video.channelId} isFollowing={false} />
-              </div>
 
-              <div className="flex items-center gap-2">
-                <div className="flex items-center rounded-full bg-secondary">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`rounded-l-full ${isLiked ? 'text-primary' : ''}`}
-                    onClick={handleLike}
-                  >
-                    <ThumbsUp className="mr-2 h-4 w-4" />
-                    {likes}
-                  </Button>
-                  <Separator orientation="vertical" className="h-6" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`rounded-r-full ${isDisliked ? 'text-primary' : ''}`}
-                    onClick={handleDislike}
-                  >
-                    <ThumbsDown className="h-4 w-4" />
-                  </Button>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Link to="/channel/$channelId" params={{ channelId: mockData.channelId }}>
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src="" />
+                        <AvatarFallback className="bg-gradient-to-br from-[#d97398] to-[#5fc4d4] text-white">
+                          {mockData.channelName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                    <div>
+                      <Link to="/channel/$channelId" params={{ channelId: mockData.channelId }}>
+                        <p className="font-semibold hover:text-primary">{mockData.channelName}</p>
+                      </Link>
+                      <p className="text-xs text-muted-foreground">1.2K followers</p>
+                    </div>
+                    <div onClick={handleFollow}>
+                      <FollowButton channelId={mockData.channelId} isFollowing={false} />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center rounded-full bg-secondary">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`rounded-l-full ${isLiked ? 'text-primary' : ''}`}
+                        onClick={handleLike}
+                      >
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        {likes}
+                      </Button>
+                      <Separator orientation="vertical" className="h-6" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`rounded-r-full ${isDisliked ? 'text-primary' : ''}`}
+                        onClick={handleDislike}
+                      >
+                        <ThumbsDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button variant="secondary" size="sm" className="rounded-full" onClick={handleShare}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share
+                    </Button>
+                  </div>
                 </div>
-                <Button variant="secondary" size="sm" className="rounded-full">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </Button>
-              </div>
-            </div>
 
-            <div className="rounded-xl bg-secondary/50 p-4">
-              <p className="text-sm font-semibold">
-                {video.views.toLocaleString()} views •{' '}
-                {formatDistanceToNow(video.uploadedAt, { addSuffix: true })}
-              </p>
-              <p className="mt-2 text-sm text-foreground">{video.description}</p>
-            </div>
+                <div className="rounded-xl bg-secondary/50 p-4">
+                  <p className="text-sm font-semibold">
+                    {mockData.views.toLocaleString()} views •{' '}
+                    {formatDistanceToNow(new Date(Number(videoMetadata.uploadTimestamp)), { addSuffix: true })}
+                  </p>
+                  <p className="mt-2 text-sm text-foreground">{videoMetadata.description || 'No description provided.'}</p>
+                </div>
+              </>
+            ) : (
+              <Alert>
+                <AlertDescription>Video not found.</AlertDescription>
+              </Alert>
+            )}
 
             <Separator />
 
-            <CommentSection videoId={videoId} comments={comments} />
+            <div onClick={handleComment}>
+              <CommentSection videoId={videoId} comments={comments} />
+            </div>
           </div>
         </div>
 

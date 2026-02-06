@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import MoodAISection from '@/components/settings/MoodAISection';
 
 type SettingsSection = 'general' | 'playback' | 'privacy' | 'notifications';
 
@@ -141,6 +142,10 @@ export default function SettingsPage() {
                       onCheckedChange={setRestrictedMode}
                     />
                   </div>
+
+                  <Separator />
+
+                  <MoodAISection />
                 </div>
               </div>
             )}

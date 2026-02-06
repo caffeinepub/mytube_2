@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Home, Compass, Upload, Library, Settings } from 'lucide-react';
+import { Home, Compass, Upload, Library, Settings, PlaySquare } from 'lucide-react';
 import { followCopy } from '@/lib/followCopy';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,7 @@ export default function Sidebar() {
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
+    { icon: PlaySquare, label: 'Shorts', path: '/shorts' },
     { icon: Compass, label: followCopy.navigation.label, path: '/following' },
     { icon: Upload, label: 'Upload', path: '/upload' },
     { icon: Library, label: 'Library', path: '/library' },

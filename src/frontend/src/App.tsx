@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
+import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
+import { registerServiceWorker } from './pwa/registerServiceWorker';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import WatchPage from './pages/WatchPage';
@@ -10,6 +12,8 @@ import UploadPage from './pages/UploadPage';
 import FollowingPage from './pages/FollowingPage';
 import LibraryPage from './pages/LibraryPage';
 import SettingsPage from './pages/SettingsPage';
+import ShortsPage from './pages/ShortsPage';
+import UploadShortPage from './pages/UploadShortPage';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -57,6 +61,18 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
+const shortsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/shorts',
+  component: ShortsPage,
+});
+
+const uploadShortRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/upload/short',
+  component: UploadShortPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   watchRoute,
@@ -65,6 +81,8 @@ const routeTree = rootRoute.addChildren([
   followingRoute,
   libraryRoute,
   settingsRoute,
+  shortsRoute,
+  uploadShortRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -76,6 +94,11 @@ declare module '@tanstack/react-router' {
 }
 
 function App() {
+  useEffect(() => {
+    // Register service worker for PWA functionality
+    registerServiceWorker();
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <RouterProvider router={router} />

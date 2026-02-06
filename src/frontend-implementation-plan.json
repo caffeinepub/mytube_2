@@ -1,92 +1,80 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix full PWA build failure and enable installable offline-capable mytube (frontend-only)",
+  "title": "YouTube-style header actions with notifications dropdown (mobile + desktop)",
   "requirements": [
     {
-      "id": "REQ-22",
-      "summary": "Resolve the full PWA build failure by adding the missing/invalid PWA build inputs (manifest + service worker registration) and ensuring the app loads without runtime errors.",
+      "id": "REQ-33",
+      "summary": "Update global header to add YouTube-style notifications and profile/account controls next to search on both mobile and desktop, preserving existing header behaviors and existing Internet Identity sign-in flow.",
       "acceptanceCriteria": [
-        "The project build completes without the \"Application creation unsuccessful\" failure.",
-        "The app can be opened in a mobile browser without runtime errors after the successful build."
+        "On desktop (md and up), the header shows search input plus right-side actions including: notifications (bell) and profile/account (avatar/user), laid out in a YouTube-like compact style.",
+        "On mobile (below md), the header right side includes the search icon plus notifications and profile/account icons, right-aligned, without overlapping the mytube logo.",
+        "When not signed in, the profile/account control presents a clear Sign In entry point (existing Internet Identity flow) instead of showing user-only menu items.",
+        "Existing header behaviors remain functional: logo navigation, desktop search submission, and mobile search expand/collapse."
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Add required PWA document wiring (manifest link and basic PWA meta tags) so the build output includes installability primitives and avoids platform PWA validation failures."
+          "description": "Add compact right-side action group for md+ (bell notifications + profile/account) positioned alongside the search UI; add matching mobile right-side icons (search toggle + bell + profile) and ensure layout stays right-aligned without overlapping the logo. Keep existing logo navigation, desktop search submit, and mobile search expand/collapse behaviors intact. Use shadcn-ui DropdownMenu and Button components to compose the controls (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/public/manifest.webmanifest",
+          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
           "operation": "create",
-          "description": "Add a valid Web App Manifest file with required fields (name, short_name, start_url, display, theme_color/background_color) to satisfy full PWA build requirements."
+          "description": "Create a reusable NotificationsDropdown component rendering a bell icon trigger and an anchored dropdown/panel; integrate sign-in vs signed-in states and responsive sizing for mobile/desktop. Compose existing shadcn-ui DropdownMenu primitives for trigger/content (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pwa/registerServiceWorker.ts",
+          "path": "frontend/src/components/account/ProfileMenu.tsx",
           "operation": "create",
-          "description": "Add a small service worker registration helper (including safe guards for unsupported browsers and dev mode) to prevent runtime errors and ensure consistent registration behavior."
-        },
-        {
-          "path": "frontend/src/main.tsx",
-          "operation": "modify",
-          "description": "Wire the service worker registration into app startup using the new helper, ensuring registration failures do not break the app and are handled gracefully."
-        },
-        {
-          "path": "frontend/public/sw.js",
-          "operation": "create",
-          "description": "Add a production-ready service worker file (no framework/plugin dependency) that supports offline navigation fallback and runtime caching; ensure it does not cache full video bytes."
+          "description": "Create a reusable profile/account control (avatar/user icon trigger) that shows a dropdown menu for signed-in users (e.g., Library/Profile/Settings/Sign Out) and a clear Sign In entry for signed-out users using the existing Internet Identity login function. Compose existing shadcn-ui DropdownMenu, Button, and menu items (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-23",
-      "summary": "Implement full PWA offline caching for app shell/pages, thumbnails, and video metadata (excluding full video files) and ensure offline behavior matches requirements.",
+      "id": "REQ-34",
+      "summary": "Add a notifications dropdown/panel opened from the bell icon listing notifications for comments, likes, and followers with message and timestamp, including empty state and mobile/desktop usability.",
       "acceptanceCriteria": [
-        "A web app manifest is present and valid, and the app is installable on mobile (Add to Home Screen).",
-        "A service worker is registered successfully in supported browsers.",
-        "When offline, previously visited pages still load (app shell + routed UI).",
-        "When offline, previously fetched thumbnails and video metadata remain available (where previously cached), while video playback gracefully indicates unavailable content if the video bytes were not cached."
+        "Clicking/tapping the bell icon opens a dropdown/panel anchored to the bell button.",
+        "The panel displays a list of notification items with at least: category (comment/like/follower), a short message, and a timestamp (relative time is acceptable).",
+        "If there are no notifications available, the panel shows an empty-state message in English (e.g., \"No notifications yet\").",
+        "The notifications UI is usable on both mobile and desktop (no overflow off-screen; scrolls if long)."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/sw.js",
+          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
           "operation": "modify",
-          "description": "Implement offline strategies: (1) cache app shell/navigation requests with an SPA fallback to the cached HTML for routed pages, (2) runtime cache thumbnails/images with a cache-first policy, (3) runtime cache video metadata (JSON/fetch responses) with stale-while-revalidate, and (4) explicitly bypass caching for video media requests (e.g., requests with destination 'video' or obvious video file extensions) so full video files are never cached."
+          "description": "Implement the dropdown/panel UI: render list items for comment/like/follower categories with short message and timestamp (use relative time), provide an English empty state, and ensure the panel is anchored to the bell trigger, stays on-screen, and becomes scrollable when long. Compose existing shadcn-ui DropdownMenu primitives and Button; do not edit files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pwa/registerServiceWorker.ts",
+          "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Add lightweight telemetry/logging hooks (non-blocking) to confirm successful registration/updates and to support verification of offline readiness without introducing runtime errors."
-        },
-        {
-          "path": "frontend/src/pages/WatchPage.tsx",
-          "operation": "modify",
-          "description": "Ensure video playback UX is graceful when offline and video bytes are unavailable (e.g., show an English offline/unavailable message in the watch experience while still rendering cached metadata/thumbnails when available)."
-        },
-        {
-          "path": "frontend/src/components/VideoPlayer.tsx",
-          "operation": "modify",
-          "description": "Adjust the player placeholder to detect offline state and present an English, user-friendly unavailable message when the video cannot be fetched, without attempting to cache or fetch full video files while offline."
+          "description": "Wire the NotificationsDropdown component into the header action area for both desktop and mobile layouts, ensuring it is reachable and visually consistent with the YouTube-like compact header style. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-24",
-      "summary": "Update the web app manifest to reference the existing generated app icons (including maskable variants) so installed icons render correctly on mobile surfaces.",
+      "id": "REQ-35",
+      "summary": "Implement a minimal, non-breaking notifications data source (in-memory/localStorage) that seeds example notifications for signed-in users only, and does not require backend changes.",
       "acceptanceCriteria": [
-        "The manifest uses the existing generated icon files under frontend/public/assets/generated/ (including maskable icons).",
-        "Installed PWA shows the correct app icon on iOS and Android (including maskable rendering where supported)."
+        "When signed in, the notifications dropdown shows a non-empty example list (seed data) for comments, likes, and followers, or previously stored items if present.",
+        "When signed out, the notifications dropdown either (a) shows a sign-in prompt message in English or (b) shows an empty state; it must not error.",
+        "No backend canister interface changes are required for this build; the app compiles and runs with the current backend."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/manifest.webmanifest",
-          "operation": "modify",
-          "description": "Populate the manifest 'icons' array to reference the existing generated icon files under frontend/public/assets/generated/ (including at least one 'maskable' purpose icon) and ensure sizes/types are correct."
+          "path": "frontend/src/hooks/useNotifications.ts",
+          "operation": "create",
+          "description": "Add a frontend-only notifications hook backed by localStorage and keyed per signed-in user (e.g., by principal string). On first signed-in load with no stored items, seed example notifications for comments/likes/followers; when signed out, return a safe empty list and/or a sign-in prompt state without throwing. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
           "operation": "modify",
-          "description": "Add iOS-friendly install metadata (e.g., apple-mobile-web-app-capable and related meta/link tags as appropriate) so icons/launch behavior render correctly across iOS and Android when installed."
+          "description": "Connect the dropdown UI to the useNotifications hook: show seeded/stored user-specific notifications when authenticated; when unauthenticated, show an English sign-in prompt or empty state without errors. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Ensure the header passes/derives authentication state (from useInternetIdentity) consistently for notifications and profile controls so signed-out users never see user-specific notifications and the UI remains non-breaking across mobile/desktop. Verify the component's usage instructions before implementing."
         }
       ]
     }

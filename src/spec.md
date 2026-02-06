@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the failed “full PWA” build for mytube so it completes successfully and delivers an installable, offline-capable PWA experience.
+**Goal:** Add YouTube-style notifications and profile/account controls to the global header (mobile + desktop), including a usable notifications dropdown.
 
 **Planned changes:**
-- Retry and repair the build process to eliminate the “Application creation unsuccessful” failure.
-- Ensure PWA “full PWA” behavior by caching the app shell/pages, thumbnails, and video metadata for offline use (excluding full video files).
-- Validate the web app manifest and service worker registration, and confirm installability on mobile (Add to Home Screen).
-- Verify the manifest references the existing generated icons under `frontend/public/assets/generated/` (including maskable icons) and that they display correctly when installed.
+- Update `frontend/src/components/Header.tsx` to render right-side header actions next to search: a notifications (bell) control and a profile/account (avatar/user) control, in a compact YouTube-like layout for both desktop and mobile.
+- Ensure mobile header layout keeps actions right-aligned and does not overlap the logo, while preserving existing mobile search expand/collapse behavior.
+- Implement a notifications dropdown/panel anchored to the bell icon that lists notification items for comments, likes, and followers, with message text and timestamps, plus an English empty state.
+- Add a minimal, non-breaking frontend-only notifications data source (in-memory and/or localStorage) so the panel renders without backend changes and only shows user-specific notifications when signed in; signed-out state must not error and should show an English prompt or empty state.
+- Keep existing header behaviors working (logo navigation, desktop search submission, mobile search behavior) and ensure any new user-facing text is in English.
 
-**User-visible outcome:** The mytube web app builds successfully, runs without mobile runtime errors, can be installed to a phone home screen, and continues to load previously visited pages plus cached thumbnails/metadata while offline (with video playback gracefully indicating unavailable content when video bytes weren’t cached).
+**User-visible outcome:** On both desktop and mobile, users see YouTube-style bell and profile controls next to the search UI; tapping the bell opens a notifications panel showing comment/like/follower notifications (or an English empty/sign-in state), and signed-out users get a clear Sign In entry point via the existing Internet Identity flow.

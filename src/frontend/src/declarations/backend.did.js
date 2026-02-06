@@ -8,10 +8,280 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const Mood = IDL.Variant({
+  'sad' : IDL.Null,
+  'happy' : IDL.Null,
+  'chill' : IDL.Null,
+  'excited' : IDL.Null,
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const UserProfile = IDL.Record({
+  'bio' : IDL.Text,
+  'username' : IDL.Text,
+  'twitter' : IDL.Text,
+  'displayName' : IDL.Text,
+  'instagram' : IDL.Text,
+  'website' : IDL.Text,
+  'facebook' : IDL.Text,
+  'youtube' : IDL.Text,
+  'bannerUrl' : IDL.Text,
+  'profilePhotoUrl' : IDL.Text,
+});
+export const UserPreferences = IDL.Record({
+  'moodAIEnabled' : IDL.Bool,
+  'currentMood' : Mood,
+});
+export const Short = IDL.Record({
+  'moods' : IDL.Vec(Mood),
+  'title' : IDL.Text,
+  'duration' : IDL.Nat,
+  'likes' : IDL.Nat,
+  'videoUrl' : IDL.Text,
+});
+export const VideoId = IDL.Text;
+export const VideoMetadata = IDL.Record({
+  'id' : VideoId,
+  'title' : IDL.Text,
+  'description' : IDL.Text,
+  'uploadTimestamp' : IDL.Nat,
+  'resolution' : IDL.Text,
+  'totalChunks' : IDL.Nat,
+  'durationSeconds' : IDL.Nat,
+  'chunkSize' : IDL.Nat,
+  'uploadedBy' : IDL.Principal,
+});
+export const StreamChunk = IDL.Record({
+  'chunkNumber' : IDL.Nat,
+  'data' : IDL.Vec(IDL.Nat8),
+  'size' : IDL.Nat,
+});
+
+export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addShort' : IDL.Func([IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getMoodHistory' : IDL.Func([], [IDL.Vec(Mood)], ['query']),
+  'getMoodPreferences' : IDL.Func([], [UserPreferences], ['query']),
+  'getRecommendedShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
+  'getShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'getVideoMetadata' : IDL.Func([VideoId], [VideoMetadata], ['query']),
+  'getVideoMetadataList' : IDL.Func([], [IDL.Vec(VideoMetadata)], ['query']),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'recordMood' : IDL.Func([Mood], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'streamVideo' : IDL.Func(
+      [VideoId, IDL.Nat, IDL.Nat],
+      [IDL.Variant({ 'error' : IDL.Text, 'chunks' : IDL.Vec(StreamChunk) })],
+      [],
+    ),
+  'updateMoodPreferences' : IDL.Func([IDL.Bool, Mood], [], []),
+  'uploadVideoChunk' : IDL.Func(
+      [VideoId, IDL.Nat, IDL.Vec(IDL.Nat8), IDL.Nat],
+      [],
+      [],
+    ),
+  'uploadVideoMetadata' : IDL.Func(
+      [
+        VideoId,
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+      ],
+      [],
+      [],
+    ),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const Mood = IDL.Variant({
+    'sad' : IDL.Null,
+    'happy' : IDL.Null,
+    'chill' : IDL.Null,
+    'excited' : IDL.Null,
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const UserProfile = IDL.Record({
+    'bio' : IDL.Text,
+    'username' : IDL.Text,
+    'twitter' : IDL.Text,
+    'displayName' : IDL.Text,
+    'instagram' : IDL.Text,
+    'website' : IDL.Text,
+    'facebook' : IDL.Text,
+    'youtube' : IDL.Text,
+    'bannerUrl' : IDL.Text,
+    'profilePhotoUrl' : IDL.Text,
+  });
+  const UserPreferences = IDL.Record({
+    'moodAIEnabled' : IDL.Bool,
+    'currentMood' : Mood,
+  });
+  const Short = IDL.Record({
+    'moods' : IDL.Vec(Mood),
+    'title' : IDL.Text,
+    'duration' : IDL.Nat,
+    'likes' : IDL.Nat,
+    'videoUrl' : IDL.Text,
+  });
+  const VideoId = IDL.Text;
+  const VideoMetadata = IDL.Record({
+    'id' : VideoId,
+    'title' : IDL.Text,
+    'description' : IDL.Text,
+    'uploadTimestamp' : IDL.Nat,
+    'resolution' : IDL.Text,
+    'totalChunks' : IDL.Nat,
+    'durationSeconds' : IDL.Nat,
+    'chunkSize' : IDL.Nat,
+    'uploadedBy' : IDL.Principal,
+  });
+  const StreamChunk = IDL.Record({
+    'chunkNumber' : IDL.Nat,
+    'data' : IDL.Vec(IDL.Nat8),
+    'size' : IDL.Nat,
+  });
+  
+  return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addShort' : IDL.Func([IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getMoodHistory' : IDL.Func([], [IDL.Vec(Mood)], ['query']),
+    'getMoodPreferences' : IDL.Func([], [UserPreferences], ['query']),
+    'getRecommendedShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
+    'getShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'getVideoMetadata' : IDL.Func([VideoId], [VideoMetadata], ['query']),
+    'getVideoMetadataList' : IDL.Func([], [IDL.Vec(VideoMetadata)], ['query']),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'recordMood' : IDL.Func([Mood], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'streamVideo' : IDL.Func(
+        [VideoId, IDL.Nat, IDL.Nat],
+        [IDL.Variant({ 'error' : IDL.Text, 'chunks' : IDL.Vec(StreamChunk) })],
+        [],
+      ),
+    'updateMoodPreferences' : IDL.Func([IDL.Bool, Mood], [], []),
+    'uploadVideoChunk' : IDL.Func(
+        [VideoId, IDL.Nat, IDL.Vec(IDL.Nat8), IDL.Nat],
+        [],
+        [],
+      ),
+    'uploadVideoMetadata' : IDL.Func(
+        [
+          VideoId,
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+        ],
+        [],
+        [],
+      ),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };
