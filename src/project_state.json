@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 77,
+  "projectStateVersion": 79,
   "summary": "Build a YouTube-like video sharing/streaming platform app named \"mytube\" with similar core features and system functionality (not an identical clone; only the name differs).",
   "architectural_notes": [
     "User confirmed the uploaded image should be used as the official mytube logo in the header and app icons; minor changes to the logo/branding assets are acceptable.",
@@ -365,6 +365,14 @@
         "REQ-35"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-user-accessible-light-mode-dark-mode-toggle-that-switches-the-app-theme-by-controlling-the-existing-next-themes-themeprovider-class-based-dark-and-applies-consistently-across-the-entire-ui",
+      "title": "Add a user-accessible Light Mode / Dark Mode toggle that switches the app theme by controlling the existing `next-themes` `ThemeProvider` (class-based `.dark`) and applies consistently across the entire UI.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -434,6 +442,20 @@
       "id": "AR-15",
       "summary": "Add YouTube-style header controls: profile/avatar icon and notifications (bell) next to/right-aligned with the search UI in the global header on both mobile and desktop; notifications should cover comments, likes, and followers (at least as initial UI/placeholder and later as real notifications).",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add Light Mode / Dark Mode support with a user-accessible theme toggle in the app UI.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Ensure the default theme behavior is well-defined and does not break existing styling: keep current default theme behavior unless explicitly changed as part of implementing the toggle, and ensure both Light and Dark themes have readable contrast for core surfaces (background, card, border, text).",
+      "reqIds": [
+        "REQ-37"
+      ],
       "status": "pending"
     }
   ],

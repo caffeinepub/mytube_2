@@ -13,6 +13,7 @@ import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from '@/hooks/useQueries';
 import { useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import ThemeToggleMenuItems from './ThemeToggleMenuItems';
 
 export default function ProfileMenu() {
   const { identity, login, clear, isLoggingIn } = useInternetIdentity();
@@ -99,6 +100,7 @@ export default function ProfileMenu() {
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </DropdownMenuItem>
+        <ThemeToggleMenuItems />
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />

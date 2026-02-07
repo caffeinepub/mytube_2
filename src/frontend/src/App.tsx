@@ -93,6 +93,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   useEffect(() => {
     // Register service worker for PWA functionality
@@ -100,9 +102,11 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <RouterProvider router={router} />
-      <Toaster />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

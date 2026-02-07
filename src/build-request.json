@@ -1,75 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Add YouTube-style profile and notifications controls next to search in the global header (mobile + desktop)",
+  "title": "Add Light Mode / Dark Mode theme toggle",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-33",
-      "text": "Update the global header (frontend/src/components/Header.tsx) to include a YouTube-style notifications (bell) control and a profile/account control positioned next to the search UI, and render these controls on both mobile and desktop.",
+      "id": "REQ-36",
+      "text": "Add a user-accessible Light Mode / Dark Mode toggle that switches the app theme by controlling the existing `next-themes` `ThemeProvider` (class-based `.dark`) and applies consistently across the entire UI.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "1.  thoda youtube style.  2.  ha dono me bhi.  3. comments, likes, followers)",
-          "build karo"
+          "janedo anhi only. Light Mode / Dark Mode add karo bas"
         ]
       },
       "acceptanceCriteria": [
-        "On desktop (md and up), the header shows search input plus right-side actions including: notifications (bell) and profile/account (avatar/user), laid out in a YouTube-like compact style.",
-        "On mobile (below md), the header right side includes the search icon plus notifications and profile/account icons, right-aligned, without overlapping the mytube logo.",
-        "When not signed in, the profile/account control presents a clear Sign In entry point (existing Internet Identity flow) instead of showing user-only menu items.",
-        "Existing header behaviors remain functional: logo navigation, desktop search submission, and mobile search expand/collapse."
+        "A theme toggle is available in the app UI and labeled in English (e.g., \"Theme\", \"Light\", \"Dark\").",
+        "Toggling updates the document theme class so Tailwind dark-mode styles apply immediately across pages/components.",
+        "The selected theme persists across page reloads (via `next-themes` persistence).",
+        "No backend changes are required for the theme toggle to work."
       ]
     },
     {
-      "id": "REQ-34",
-      "text": "Add a notifications dropdown/panel opened from the bell icon that lists notification items for the categories: comments, likes, and followers.",
+      "id": "REQ-37",
+      "text": "Ensure the default theme behavior is well-defined and does not break existing styling: keep current default theme behavior unless explicitly changed as part of implementing the toggle, and ensure both Light and Dark themes have readable contrast for core surfaces (background, card, border, text).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "3.comments, likes, followers)"
+          "Light Mode / Dark Mode add karo bas"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking/tapping the bell icon opens a dropdown/panel anchored to the bell button.",
-        "The panel displays a list of notification items with at least: category (comment/like/follower), a short message, and a timestamp (relative time is acceptable).",
-        "If there are no notifications available, the panel shows an empty-state message in English (e.g., \"No notifications yet\").",
-        "The notifications UI is usable on both mobile and desktop (no overflow off-screen; scrolls if long)."
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "text": "Provide a minimal, non-breaking notifications data source for the new UI so the notifications panel can render without backend changes (e.g., in-memory or localStorage), and ensure it only shows user-specific notifications when the user is signed in.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "comments, likes, followers)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When signed in, the notifications dropdown shows a non-empty example list (seed data) for comments, likes, and followers, or previously stored items if present.",
-        "When signed out, the notifications dropdown either (a) shows a sign-in prompt message in English or (b) shows an empty state; it must not error.",
-        "No backend canister interface changes are required for this build; the app compiles and runs with the current backend."
+        "On first load, the app still renders with a valid theme (no flash of unstyled/incorrect theme beyond normal `next-themes` behavior).",
+        "In Light mode and Dark mode, core surfaces (`bg-background`, `bg-card`, borders, `text-foreground`) remain legible and consistent with the existing CSS variables in `frontend/src/index.css`."
       ]
     }
   ],
   "constraints": [
-    "Use English for any user-facing text added/changed by this build request.",
-    "Do not edit files under frontend/src/components/ui (compose existing shadcn components instead).",
-    "Do not edit any frontend immutablePaths listed in SYSTEM_CONTEXT.",
-    "Backend must remain single-actor; do not introduce additional backend services."
+    "Frontend immutablePaths must not be edited: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
+    "Keep the backend as a single Motoko actor; no backend work is needed for this request."
   ],
   "nonGoals": [
-    "Implementing a persistent, backend-driven notifications system (storage, querying, marking as read) is out of scope for this request.",
-    "Adding real push notifications, emails, or real-time delivery is out of scope."
+    "Do not change navigation bar transparency or colors (user deferred that request).",
+    "Do not add localization/Hindi UI changes as part of this task.",
+    "Do not add new notification features or other settings beyond the theme toggle."
   ],
   "imageRequirements": {
     "required": [],

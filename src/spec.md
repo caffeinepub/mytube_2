@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add YouTube-style notifications and profile/account controls to the global header (mobile + desktop), including a usable notifications dropdown.
+**Goal:** Add a Light Mode / Dark Mode theme toggle that controls the existing `next-themes` ThemeProvider and applies across the entire UI.
 
 **Planned changes:**
-- Update `frontend/src/components/Header.tsx` to render right-side header actions next to search: a notifications (bell) control and a profile/account (avatar/user) control, in a compact YouTube-like layout for both desktop and mobile.
-- Ensure mobile header layout keeps actions right-aligned and does not overlap the logo, while preserving existing mobile search expand/collapse behavior.
-- Implement a notifications dropdown/panel anchored to the bell icon that lists notification items for comments, likes, and followers, with message text and timestamps, plus an English empty state.
-- Add a minimal, non-breaking frontend-only notifications data source (in-memory and/or localStorage) so the panel renders without backend changes and only shows user-specific notifications when signed in; signed-out state must not error and should show an English prompt or empty state.
-- Keep existing header behaviors working (logo navigation, desktop search submission, mobile search behavior) and ensure any new user-facing text is in English.
+- Add a user-accessible theme toggle in the UI with English labels (e.g., “Theme”, “Light”, “Dark”).
+- Wire the toggle to `next-themes` so it updates the document class (`.dark`) and applies Tailwind dark-mode styles immediately across pages/components.
+- Ensure the selected theme persists across reloads via `next-themes` persistence and that both themes remain readable for core surfaces (background, card, borders, text) using existing CSS variables.
 
-**User-visible outcome:** On both desktop and mobile, users see YouTube-style bell and profile controls next to the search UI; tapping the bell opens a notifications panel showing comment/like/follower notifications (or an English empty/sign-in state), and signed-out users get a clear Sign In entry point via the existing Internet Identity flow.
+**User-visible outcome:** Users can switch between Light and Dark themes from within the app, and their selection stays applied after refreshing or revisiting the app.

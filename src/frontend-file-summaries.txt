@@ -1,5 +1,5 @@
 {
-  "frontend/src/App.tsx": "Main application component with TanStack Router setup, theme provider, route definitions, and service worker registration via useEffect hook for PWA functionality.",
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, QueryClient provider, next-themes ThemeProvider configured for smooth class-based theming with system default, route definitions, and service worker registration via useEffect hook for PWA functionality.",
   "frontend/src/lib/followCopy.ts": "Centralized copy/label mapping for follow terminology used throughout the app (follow, following, unfollow, navigation labels, empty states).",
   "frontend/src/components/Layout.tsx": "Root layout component that wraps all pages with header, sidebar (desktop only), bottom navigation (mobile only), and PWA install prompt, with proper bottom padding for mobile content.",
   "frontend/src/components/Header.tsx": "Responsive header with mytube logo, collapsible mobile search, desktop search bar, and YouTube-style right-side actions (notifications bell and profile menu) on both mobile and desktop layouts.",
@@ -37,5 +37,6 @@
   "frontend/src/lib/videoStreamSource.ts": "Client-side streaming adapter class that fetches video chunks from the backend incrementally and creates blob URLs for HTML5 video playback.",
   "frontend/src/hooks/useNotifications.ts": "Custom hook that manages user-specific notifications stored in localStorage, providing seeded demo data for comments/likes/followers with read/unread states and timestamp formatting.",
   "frontend/src/components/notifications/NotificationsDropdown.tsx": "Notifications dropdown component with bell icon trigger showing categorized notifications (comments, likes, followers) with timestamps, unread badges, mark-as-read functionality, and sign-in prompt for unauthenticated users.",
-  "frontend/src/components/account/ProfileMenu.tsx": "Profile/account dropdown menu component displaying user avatar, profile info, navigation links (Profile, Library, Upload options, Settings), and sign-out functionality with sign-in button for unauthenticated users."
+  "frontend/src/components/account/ProfileMenu.tsx": "Profile/account dropdown menu component displaying user avatar, profile info, navigation links (Profile, Library, Upload options, Settings), theme toggle, and sign-out functionality with sign-in button for unauthenticated users.",
+  "frontend/src/components/account/ThemeToggleMenuItems.tsx": "Theme toggle menu items component that displays Light, Dark, and System theme options with visual current-selection indicators using next-themes useTheme hook and shadcn-ui dropdown components."
 }

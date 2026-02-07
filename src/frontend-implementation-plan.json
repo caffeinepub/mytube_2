@@ -1,80 +1,52 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "YouTube-style header actions with notifications dropdown (mobile + desktop)",
+  "title": "Light/Dark theme toggle using existing next-themes ThemeProvider",
   "requirements": [
     {
-      "id": "REQ-33",
-      "summary": "Update global header to add YouTube-style notifications and profile/account controls next to search on both mobile and desktop, preserving existing header behaviors and existing Internet Identity sign-in flow.",
+      "id": "REQ-36",
+      "summary": "Add a user-accessible Light/Dark theme toggle that controls the existing next-themes ThemeProvider (class-based .dark) and applies across the UI with persistence.",
       "acceptanceCriteria": [
-        "On desktop (md and up), the header shows search input plus right-side actions including: notifications (bell) and profile/account (avatar/user), laid out in a YouTube-like compact style.",
-        "On mobile (below md), the header right side includes the search icon plus notifications and profile/account icons, right-aligned, without overlapping the mytube logo.",
-        "When not signed in, the profile/account control presents a clear Sign In entry point (existing Internet Identity flow) instead of showing user-only menu items.",
-        "Existing header behaviors remain functional: logo navigation, desktop search submission, and mobile search expand/collapse."
+        "A theme toggle is available in the app UI and labeled in English (e.g., \"Theme\", \"Light\", \"Dark\").",
+        "Toggling updates the document theme class so Tailwind dark-mode styles apply immediately across pages/components.",
+        "The selected theme persists across page reloads (via `next-themes` persistence).",
+        "No backend changes are required for the theme toggle to work."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Add compact right-side action group for md+ (bell notifications + profile/account) positioned alongside the search UI; add matching mobile right-side icons (search toggle + bell + profile) and ensure layout stays right-aligned without overlapping the logo. Keep existing logo navigation, desktop search submit, and mobile search expand/collapse behaviors intact. Use shadcn-ui DropdownMenu and Button components to compose the controls (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "path": "frontend/src/components/account/ThemeToggleMenuItems.tsx",
           "operation": "create",
-          "description": "Create a reusable NotificationsDropdown component rendering a bell icon trigger and an anchored dropdown/panel; integrate sign-in vs signed-in states and responsive sizing for mobile/desktop. Compose existing shadcn-ui DropdownMenu primitives for trigger/content (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "description": "Create a small ProfileMenu-integrated theme control that uses next-themes `useTheme()` to set `light`/`dark`, and renders labeled menu items (e.g., \"Theme\", \"Light\", \"Dark\") with a visual current-selection indicator. Use shadcn-ui DropdownMenu primitives (e.g., DropdownMenuItem/Group/Separator) for consistent styling. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/components/account/ProfileMenu.tsx",
-          "operation": "create",
-          "description": "Create a reusable profile/account control (avatar/user icon trigger) that shows a dropdown menu for signed-in users (e.g., Library/Profile/Settings/Sign Out) and a clear Sign In entry for signed-out users using the existing Internet Identity login function. Compose existing shadcn-ui DropdownMenu, Button, and menu items (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "operation": "modify",
+          "description": "Wire the new ThemeToggleMenuItems into the existing profile dropdown so the toggle is always user-accessible from the main app UI without adding new settings areas. Use existing shadcn-ui dropdown/menu components already used here. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Ensure the existing next-themes ThemeProvider is configured for app-wide class-based theming and smooth switching (e.g., keep `attribute=\"class\"` and current default behavior, and enable next-themes options that avoid jarring transitions during toggle) so Tailwind dark styles apply immediately and persist via next-themes."
         }
       ]
     },
     {
-      "id": "REQ-34",
-      "summary": "Add a notifications dropdown/panel opened from the bell icon listing notifications for comments, likes, and followers with message and timestamp, including empty state and mobile/desktop usability.",
+      "id": "REQ-37",
+      "summary": "Keep default theme behavior stable and ensure light/dark surfaces remain readable and consistent with existing CSS variables.",
       "acceptanceCriteria": [
-        "Clicking/tapping the bell icon opens a dropdown/panel anchored to the bell button.",
-        "The panel displays a list of notification items with at least: category (comment/like/follower), a short message, and a timestamp (relative time is acceptable).",
-        "If there are no notifications available, the panel shows an empty-state message in English (e.g., \"No notifications yet\").",
-        "The notifications UI is usable on both mobile and desktop (no overflow off-screen; scrolls if long)."
+        "On first load, the app still renders with a valid theme (no flash of unstyled/incorrect theme beyond normal `next-themes` behavior).",
+        "In Light mode and Dark mode, core surfaces (`bg-background`, `bg-card`, borders, `text-foreground`) remain legible and consistent with the existing CSS variables in `frontend/src/index.css`."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Implement the dropdown/panel UI: render list items for comment/like/follower categories with short message and timestamp (use relative time), provide an English empty state, and ensure the panel is anchored to the bell trigger, stays on-screen, and becomes scrollable when long. Compose existing shadcn-ui DropdownMenu primitives and Button; do not edit files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
+          "description": "Review and, if necessary, minimally tune existing light/dark CSS variables for core surfaces (background/card/border/foreground) to ensure readable contrast in both themes while preserving the current look and avoiding unrelated nav color changes."
         },
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Wire the NotificationsDropdown component into the header action area for both desktop and mobile layouts, ensuring it is reachable and visually consistent with the YouTube-like compact header style. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "summary": "Implement a minimal, non-breaking notifications data source (in-memory/localStorage) that seeds example notifications for signed-in users only, and does not require backend changes.",
-      "acceptanceCriteria": [
-        "When signed in, the notifications dropdown shows a non-empty example list (seed data) for comments, likes, and followers, or previously stored items if present.",
-        "When signed out, the notifications dropdown either (a) shows a sign-in prompt message in English or (b) shows an empty state; it must not error.",
-        "No backend canister interface changes are required for this build; the app compiles and runs with the current backend."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useNotifications.ts",
-          "operation": "create",
-          "description": "Add a frontend-only notifications hook backed by localStorage and keyed per signed-in user (e.g., by principal string). On first signed-in load with no stored items, seed example notifications for comments/likes/followers; when signed out, return a safe empty list and/or a sign-in prompt state without throwing. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
-          "operation": "modify",
-          "description": "Connect the dropdown UI to the useNotifications hook: show seeded/stored user-specific notifications when authenticated; when unauthenticated, show an English sign-in prompt or empty state without errors. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Ensure the header passes/derives authentication state (from useInternetIdentity) consistently for notifications and profile controls so signed-out users never see user-specific notifications and the UI remains non-breaking across mobile/desktop. Verify the component's usage instructions before implementing."
+          "description": "Validate that the top-level layout continues to rely on theme tokens (e.g., `bg-background`) so switching themes affects all routed content consistently; adjust only if any container is hard-coded in a way that prevents theme variables from applying app-wide."
         }
       ]
     }
