@@ -4,8 +4,9 @@ import { useMoodSignals } from '../hooks/useMoodSignals';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share2, Play } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Play, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Short, Mood } from '../backend';
 
 export default function ShortsPage() {
@@ -45,6 +46,7 @@ export default function ShortsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState<{ [key: number]: boolean }>({});
   const [watchStartTime, setWatchStartTime] = useState<{ [key: number]: number }>({});
+  const [videoErrors, setVideoErrors] = useState<{ [key: number]: boolean }>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
@@ -110,6 +112,10 @@ export default function ShortsPage() {
     // TODO: Implement share functionality
   };
 
+  const handleVideoError = (index: number) => {
+    setVideoErrors((prev) => ({ ...prev, [index]: true }));
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
@@ -161,63 +167,77 @@ export default function ShortsPage() {
           className="shorts-item relative flex h-[calc(100vh-4rem)] w-full snap-start snap-always items-center justify-center bg-black"
         >
           <div className="relative h-full w-full max-w-md">
-            <video
-              ref={(el) => {
-                videoRefs.current[index] = el;
-              }}
-              src={short.videoUrl}
-              className="h-full w-full object-contain"
-              loop
-              playsInline
-              onClick={() => togglePlay(index)}
-            />
-
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {!isPlaying[index] && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-16 w-16 rounded-full bg-black/50 pointer-events-auto"
+            {videoErrors[index] ? (
+              <div className="flex h-full w-full items-center justify-center bg-black">
+                <Alert variant="destructive" className="mx-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to load video. The video may have been removed or is temporarily unavailable.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            ) : (
+              <>
+                <video
+                  ref={(el) => {
+                    videoRefs.current[index] = el;
+                  }}
+                  src={short.videoUrl}
+                  className="h-full w-full object-contain"
+                  loop
+                  playsInline
                   onClick={() => togglePlay(index)}
-                >
-                  <Play className="h-8 w-8 text-white" />
-                </Button>
-              )}
-            </div>
+                  onError={() => handleVideoError(index)}
+                />
 
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pb-6">
-              <h3 className="text-lg font-semibold text-white mb-1">{short.title}</h3>
-              <p className="text-sm text-white/80">
-                {Number(short.likes)} likes · {Math.floor(Number(short.duration))}s
-              </p>
-            </div>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  {!isPlaying[index] && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-16 w-16 rounded-full bg-black/50 pointer-events-auto"
+                      onClick={() => togglePlay(index)}
+                    >
+                      <Play className="h-8 w-8 text-white" />
+                    </Button>
+                  )}
+                </div>
 
-            <div className="absolute bottom-20 right-4 flex flex-col gap-4">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-                onClick={() => handleLike(index)}
-              >
-                <Heart className="h-6 w-6" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-                onClick={handleComment}
-              >
-                <MessageCircle className="h-6 w-6" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-                onClick={handleShare}
-              >
-                <Share2 className="h-6 w-6" />
-              </Button>
-            </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pb-6">
+                  <h3 className="text-lg font-semibold text-white mb-1">{short.title}</h3>
+                  <p className="text-sm text-white/80">
+                    {Number(short.likes)} likes · {Math.floor(Number(short.duration))}s
+                  </p>
+                </div>
+
+                <div className="absolute bottom-20 right-4 flex flex-col gap-4">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                    onClick={() => handleLike(index)}
+                  >
+                    <Heart className="h-6 w-6" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                    onClick={handleComment}
+                  >
+                    <MessageCircle className="h-6 w-6" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="h-6 w-6" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ))}

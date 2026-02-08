@@ -12,9 +12,10 @@ interface VideoPlayerProps {
     totalChunks: number;
     chunkSize: number;
   };
+  onBlobUrlReady?: (url: string) => void;
 }
 
-export default function VideoPlayer({ videoId, title, isOffline = false, metadata }: VideoPlayerProps) {
+export default function VideoPlayer({ videoId, title, isOffline = false, metadata, onBlobUrlReady }: VideoPlayerProps) {
   const { actor } = useActor();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +25,12 @@ export default function VideoPlayer({ videoId, title, isOffline = false, metadat
 
   useEffect(() => {
     if (isOffline || !actor || !metadata) {
+      return;
+    }
+
+    // Validate metadata before attempting to stream
+    if (!metadata.totalChunks || metadata.totalChunks <= 0 || !metadata.chunkSize || metadata.chunkSize <= 0) {
+      setError('Failed to load video. Please try again.');
       return;
     }
 
@@ -51,6 +58,10 @@ export default function VideoPlayer({ videoId, title, isOffline = false, metadat
         if (isMounted) {
           setVideoUrl(blobUrl);
           setIsLoading(false);
+          // Notify parent component of blob URL
+          if (onBlobUrlReady) {
+            onBlobUrlReady(blobUrl);
+          }
         }
       } catch (err: any) {
         console.error('Error loading video:', err);
@@ -69,7 +80,7 @@ export default function VideoPlayer({ videoId, title, isOffline = false, metadat
         VideoStreamSource.revokeBlobUrl(blobUrl);
       }
     };
-  }, [videoId, actor, isOffline, metadata]);
+  }, [videoId, actor, isOffline, metadata, onBlobUrlReady]);
 
   if (isOffline) {
     return (

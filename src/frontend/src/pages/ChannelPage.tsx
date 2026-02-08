@@ -1,5 +1,6 @@
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
+import { Principal } from '@dfinity/principal';
 import ChannelHeader from '@/components/ChannelHeader';
 import VideoCard from '@/components/VideoCard';
 import ProfileEditDialog from '@/components/profile/ProfileEditDialog';
@@ -17,8 +18,16 @@ export default function ChannelPage() {
 
   const isOwnChannel = identity?.getPrincipal().toString() === channelId;
 
+  // Convert channelId string to Principal for backend call
+  let channelPrincipal: Principal | null = null;
+  try {
+    channelPrincipal = Principal.fromText(channelId);
+  } catch (error) {
+    console.error('Invalid principal ID:', channelId);
+  }
+
   // Fetch profile data
-  const { data: viewedProfile, isLoading: viewedProfileLoading } = useGetUserProfile(channelId);
+  const { data: viewedProfile, isLoading: viewedProfileLoading } = useGetUserProfile(channelPrincipal);
   const { data: currentUserProfile, isLoading: currentUserProfileLoading } = useGetCallerUserProfile();
   const { mutateAsync: saveProfile, isPending: isSaving } = useSaveCallerUserProfile();
 

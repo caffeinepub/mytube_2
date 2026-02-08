@@ -1,28 +1,36 @@
-import { useState } from 'react';
+import { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useGetCommentsForVideo, useAddComment, useGetCallerUserProfile } from '../hooks/useQueries';
 import { formatDistanceToNow } from 'date-fns';
-
-interface Comment {
-  id: string;
-  author: string;
-  authorId: string;
-  content: string;
-  createdAt: Date;
-}
+import type { Comment } from '../backend';
 
 interface CommentSectionProps {
   videoId: string;
-  comments: Comment[];
 }
 
-export default function CommentSection({ videoId, comments: initialComments }: CommentSectionProps) {
+export interface CommentSectionRef {
+  focusInput: () => void;
+}
+
+const CommentSection = forwardRef<CommentSectionRef, CommentSectionProps>(({ videoId }, ref) => {
   const { identity, login } = useInternetIdentity();
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const { data: comments = [], isLoading: commentsLoading } = useGetCommentsForVideo(videoId);
+  const { data: userProfile } = useGetCallerUserProfile();
+  const addCommentMutation = useAddComment();
   const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Expose focus method to parent
+  useImperativeHandle(ref, () => ({
+    focusInput: () => {
+      textareaRef.current?.focus();
+      textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,23 +40,15 @@ export default function CommentSection({ videoId, comments: initialComments }: C
     }
     if (!newComment.trim()) return;
 
-    setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const comment: Comment = {
-        id: Date.now().toString(),
-        author: 'You',
-        authorId: identity.getPrincipal().toString(),
-        content: newComment,
-        createdAt: new Date(),
-      };
-      setComments([comment, ...comments]);
+      await addCommentMutation.mutateAsync({
+        videoId,
+        text: newComment.trim(),
+      });
       setNewComment('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to post comment:', error);
-    } finally {
-      setIsSubmitting(false);
+      // Error handling via React Query
     }
   };
 
@@ -59,13 +59,14 @@ export default function CommentSection({ videoId, comments: initialComments }: C
       {identity ? (
         <form onSubmit={handleSubmit} className="flex gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="" />
+            <AvatarImage src={userProfile?.profilePhotoUrl || ''} />
             <AvatarFallback className="bg-gradient-to-br from-[#d97398] to-[#5fc4d4] text-white">
-              U
+              {userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-2">
             <Textarea
+              ref={textareaRef}
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
@@ -76,12 +77,12 @@ export default function CommentSection({ videoId, comments: initialComments }: C
                 type="button"
                 variant="ghost"
                 onClick={() => setNewComment('')}
-                disabled={!newComment.trim() || isSubmitting}
+                disabled={!newComment.trim() || addCommentMutation.isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!newComment.trim() || isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Comment'}
+              <Button type="submit" disabled={!newComment.trim() || addCommentMutation.isPending}>
+                {addCommentMutation.isPending ? 'Posting...' : 'Comment'}
               </Button>
             </div>
           </div>
@@ -98,26 +99,50 @@ export default function CommentSection({ videoId, comments: initialComments }: C
       )}
 
       <div className="space-y-4">
-        {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="" />
-              <AvatarFallback className="bg-gradient-to-br from-[#d97398] to-[#5fc4d4] text-white">
-                {comment.author.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">{comment.author}</span>
-                <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(comment.createdAt, { addSuffix: true })}
-                </span>
+        {commentsLoading ? (
+          <>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
               </div>
-              <p className="text-sm text-foreground">{comment.content}</p>
-            </div>
+            ))}
+          </>
+        ) : comments.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground">
+            No comments yet. Be the first to comment!
           </div>
-        ))}
+        ) : (
+          comments.map((comment: Comment) => (
+            <div key={comment.id.toString()} className="flex gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src="" />
+                <AvatarFallback className="bg-gradient-to-br from-[#d97398] to-[#5fc4d4] text-white">
+                  {comment.author.toString().charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold">
+                    {comment.author.toString().slice(0, 8)}...
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(Number(comment.timestamp) / 1000000), { addSuffix: true })}
+                  </p>
+                </div>
+                <p className="text-sm text-foreground">{comment.text}</p>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
-}
+});
+
+CommentSection.displayName = 'CommentSection';
+
+export default CommentSection;

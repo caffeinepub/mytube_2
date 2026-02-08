@@ -1,52 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Light/Dark theme toggle using existing next-themes ThemeProvider",
+  "title": "Mobile bottom tab bar strip background #1a1a1a",
   "requirements": [
     {
-      "id": "REQ-36",
-      "summary": "Add a user-accessible Light/Dark theme toggle that controls the existing next-themes ThemeProvider (class-based .dark) and applies across the UI with persistence.",
+      "id": "REQ-1",
+      "summary": "Make the mobile BottomNav strip behind icons use a solid #1a1a1a background while keeping button and active-state styling unchanged.",
       "acceptanceCriteria": [
-        "A theme toggle is available in the app UI and labeled in English (e.g., \"Theme\", \"Light\", \"Dark\").",
-        "Toggling updates the document theme class so Tailwind dark-mode styles apply immediately across pages/components.",
-        "The selected theme persists across page reloads (via `next-themes` persistence).",
-        "No backend changes are required for the theme toggle to work."
+        "On mobile (md:hidden BottomNav), the bar behind the icons renders with background color #1a1a1a (visibly darker than before).",
+        "The icon/button backgrounds (bg-bottom-nav-button) remain the same as before.",
+        "Active tab styling remains the same as before (active text-primary and icon fill-primary).",
+        "The background color is not transparent and is visually consistent across routes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/account/ThemeToggleMenuItems.tsx",
-          "operation": "create",
-          "description": "Create a small ProfileMenu-integrated theme control that uses next-themes `useTheme()` to set `light`/`dark`, and renders labeled menu items (e.g., \"Theme\", \"Light\", \"Dark\") with a visual current-selection indicator. Use shadcn-ui DropdownMenu primitives (e.g., DropdownMenuItem/Group/Separator) for consistent styling. Verify the component's usage instructions before implementing."
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update the Tailwind color token for 'bottom-nav-bar' so 'bg-bottom-nav-bar' resolves to a solid #1a1a1a (without changing 'bottom-nav-button' or active-state related tokens)."
         },
         {
-          "path": "frontend/src/components/account/ProfileMenu.tsx",
+          "path": "frontend/src/components/BottomNav.tsx",
           "operation": "modify",
-          "description": "Wire the new ThemeToggleMenuItems into the existing profile dropdown so the toggle is always user-accessible from the main app UI without adding new settings areas. Use existing shadcn-ui dropdown/menu components already used here. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Ensure the existing next-themes ThemeProvider is configured for app-wide class-based theming and smooth switching (e.g., keep `attribute=\"class\"` and current default behavior, and enable next-themes options that avoid jarring transitions during toggle) so Tailwind dark styles apply immediately and persist via next-themes."
+          "description": "Confirm the BottomNav container continues to use the existing 'bg-bottom-nav-bar' class and that per-button background and active-state classes remain unchanged after the color token update."
         }
       ]
     },
     {
-      "id": "REQ-37",
-      "summary": "Keep default theme behavior stable and ensure light/dark surfaces remain readable and consistent with existing CSS variables.",
+      "id": "REQ-2",
+      "summary": "Fix BottomNav background styling reliability by ensuring the Tailwind token used for the bar background resolves correctly (not ignored due to CSS variable formatting).",
       "acceptanceCriteria": [
-        "On first load, the app still renders with a valid theme (no flash of unstyled/incorrect theme beyond normal `next-themes` behavior).",
-        "In Light mode and Dark mode, core surfaces (`bg-background`, `bg-card`, borders, `text-foreground`) remain legible and consistent with the existing CSS variables in `frontend/src/index.css`."
+        "After implementation, changing the bottom-nav bar color results in an observable UI difference in the running app (not just in code).",
+        "No regressions to other theme colors outside the bottom navigation bar strip."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Review and, if necessary, minimally tune existing light/dark CSS variables for core surfaces (background/card/border/foreground) to ensure readable contrast in both themes while preserving the current look and avoiding unrelated nav color changes."
-        },
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Validate that the top-level layout continues to rely on theme tokens (e.g., `bg-background`) so switching themes affects all routed content consistently; adjust only if any container is hard-coded in a way that prevents theme variables from applying app-wide."
+          "description": "Replace the current CSS-variable-based definition for the 'bottom-nav-bar' Tailwind color with a compatible value format (e.g., a direct hex color) so Tailwind-generated 'bg-bottom-nav-bar' styles are applied reliably, without altering other theme tokens."
         }
       ]
     }

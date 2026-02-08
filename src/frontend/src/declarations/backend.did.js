@@ -19,6 +19,12 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const VideoId = IDL.Text;
+export const CommentId = IDL.Nat;
+export const CreatedCommentEvent = IDL.Record({
+  'commentId' : CommentId,
+  'timestamp' : IDL.Nat,
+});
 export const Mood = IDL.Variant({
   'sad' : IDL.Null,
   'happy' : IDL.Null,
@@ -42,6 +48,17 @@ export const UserProfile = IDL.Record({
   'bannerUrl' : IDL.Text,
   'profilePhotoUrl' : IDL.Text,
 });
+export const Comment = IDL.Record({
+  'id' : CommentId,
+  'text' : IDL.Text,
+  'author' : IDL.Principal,
+  'timestamp' : IDL.Nat,
+  'videoId' : VideoId,
+});
+export const CommentsList = IDL.Record({
+  'totalCount' : IDL.Nat,
+  'comments' : IDL.Vec(Comment),
+});
 export const UserPreferences = IDL.Record({
   'moodAIEnabled' : IDL.Bool,
   'currentMood' : Mood,
@@ -53,7 +70,17 @@ export const Short = IDL.Record({
   'likes' : IDL.Nat,
   'videoUrl' : IDL.Text,
 });
-export const VideoId = IDL.Text;
+export const InteractionState = IDL.Record({
+  'liked' : IDL.Bool,
+  'saved' : IDL.Bool,
+  'disliked' : IDL.Bool,
+});
+export const VideoInteractionSummary = IDL.Record({
+  'dislikeCount' : IDL.Nat,
+  'likeCount' : IDL.Nat,
+  'commentCount' : IDL.Nat,
+  'savedCount' : IDL.Nat,
+});
 export const VideoMetadata = IDL.Record({
   'id' : VideoId,
   'title' : IDL.Text,
@@ -69,6 +96,12 @@ export const StreamChunk = IDL.Record({
   'chunkNumber' : IDL.Nat,
   'data' : IDL.Vec(IDL.Nat8),
   'size' : IDL.Nat,
+});
+export const VideoInteractionRequest = IDL.Record({
+  'like' : IDL.Bool,
+  'saved' : IDL.Bool,
+  'dislike' : IDL.Bool,
+  'videoId' : VideoId,
 });
 
 export const idlService = IDL.Service({
@@ -99,10 +132,25 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addShort' : IDL.Func([IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)], [], []),
+  'addComment' : IDL.Func([VideoId, IDL.Text], [CreatedCommentEvent], []),
+  'addShortAdmin' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)],
+      [],
+      [],
+    ),
+  'addShortUser' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)],
+      [],
+      [],
+    ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getCommentsForVideo' : IDL.Func(
+      [VideoId, IDL.Nat, IDL.Nat],
+      [CommentsList],
+      ['query'],
+    ),
   'getMoodHistory' : IDL.Func([], [IDL.Vec(Mood)], ['query']),
   'getMoodPreferences' : IDL.Func([], [UserPreferences], ['query']),
   'getRecommendedShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
@@ -110,6 +158,16 @@ export const idlService = IDL.Service({
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'getVideoInteractionState' : IDL.Func(
+      [VideoId],
+      [InteractionState],
+      ['query'],
+    ),
+  'getVideoInteractionSummary' : IDL.Func(
+      [VideoId],
+      [VideoInteractionSummary],
       ['query'],
     ),
   'getVideoMetadata' : IDL.Func([VideoId], [VideoMetadata], ['query']),
@@ -123,6 +181,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateMoodPreferences' : IDL.Func([IDL.Bool, Mood], [], []),
+  'updateVideoInteraction' : IDL.Func([VideoInteractionRequest], [], []),
   'uploadVideoChunk' : IDL.Func(
       [VideoId, IDL.Nat, IDL.Vec(IDL.Nat8), IDL.Nat],
       [],
@@ -158,6 +217,12 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const VideoId = IDL.Text;
+  const CommentId = IDL.Nat;
+  const CreatedCommentEvent = IDL.Record({
+    'commentId' : CommentId,
+    'timestamp' : IDL.Nat,
+  });
   const Mood = IDL.Variant({
     'sad' : IDL.Null,
     'happy' : IDL.Null,
@@ -181,6 +246,17 @@ export const idlFactory = ({ IDL }) => {
     'bannerUrl' : IDL.Text,
     'profilePhotoUrl' : IDL.Text,
   });
+  const Comment = IDL.Record({
+    'id' : CommentId,
+    'text' : IDL.Text,
+    'author' : IDL.Principal,
+    'timestamp' : IDL.Nat,
+    'videoId' : VideoId,
+  });
+  const CommentsList = IDL.Record({
+    'totalCount' : IDL.Nat,
+    'comments' : IDL.Vec(Comment),
+  });
   const UserPreferences = IDL.Record({
     'moodAIEnabled' : IDL.Bool,
     'currentMood' : Mood,
@@ -192,7 +268,17 @@ export const idlFactory = ({ IDL }) => {
     'likes' : IDL.Nat,
     'videoUrl' : IDL.Text,
   });
-  const VideoId = IDL.Text;
+  const InteractionState = IDL.Record({
+    'liked' : IDL.Bool,
+    'saved' : IDL.Bool,
+    'disliked' : IDL.Bool,
+  });
+  const VideoInteractionSummary = IDL.Record({
+    'dislikeCount' : IDL.Nat,
+    'likeCount' : IDL.Nat,
+    'commentCount' : IDL.Nat,
+    'savedCount' : IDL.Nat,
+  });
   const VideoMetadata = IDL.Record({
     'id' : VideoId,
     'title' : IDL.Text,
@@ -208,6 +294,12 @@ export const idlFactory = ({ IDL }) => {
     'chunkNumber' : IDL.Nat,
     'data' : IDL.Vec(IDL.Nat8),
     'size' : IDL.Nat,
+  });
+  const VideoInteractionRequest = IDL.Record({
+    'like' : IDL.Bool,
+    'saved' : IDL.Bool,
+    'dislike' : IDL.Bool,
+    'videoId' : VideoId,
   });
   
   return IDL.Service({
@@ -238,10 +330,25 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addShort' : IDL.Func([IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)], [], []),
+    'addComment' : IDL.Func([VideoId, IDL.Text], [CreatedCommentEvent], []),
+    'addShortAdmin' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)],
+        [],
+        [],
+      ),
+    'addShortUser' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat, IDL.Vec(Mood)],
+        [],
+        [],
+      ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getCommentsForVideo' : IDL.Func(
+        [VideoId, IDL.Nat, IDL.Nat],
+        [CommentsList],
+        ['query'],
+      ),
     'getMoodHistory' : IDL.Func([], [IDL.Vec(Mood)], ['query']),
     'getMoodPreferences' : IDL.Func([], [UserPreferences], ['query']),
     'getRecommendedShorts' : IDL.Func([], [IDL.Vec(Short)], ['query']),
@@ -249,6 +356,16 @@ export const idlFactory = ({ IDL }) => {
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'getVideoInteractionState' : IDL.Func(
+        [VideoId],
+        [InteractionState],
+        ['query'],
+      ),
+    'getVideoInteractionSummary' : IDL.Func(
+        [VideoId],
+        [VideoInteractionSummary],
         ['query'],
       ),
     'getVideoMetadata' : IDL.Func([VideoId], [VideoMetadata], ['query']),
@@ -262,6 +379,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateMoodPreferences' : IDL.Func([IDL.Bool, Mood], [], []),
+    'updateVideoInteraction' : IDL.Func([VideoInteractionRequest], [], []),
     'uploadVideoChunk' : IDL.Func(
         [VideoId, IDL.Nat, IDL.Vec(IDL.Nat8), IDL.Nat],
         [],

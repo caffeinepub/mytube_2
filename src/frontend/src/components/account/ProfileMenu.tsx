@@ -90,7 +90,7 @@ export default function ProfileMenu() {
             <Video className="mr-2 h-4 w-4" />
             Upload Video
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate({ to: '/upload/short' })}>
+          <DropdownMenuItem onClick={() => navigate({ to: '/upload-short' })}>
             <Upload className="mr-2 h-4 w-4" />
             Upload Short
           </DropdownMenuItem>

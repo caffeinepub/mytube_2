@@ -1,30 +1,36 @@
 import { useParams, Link } from '@tanstack/react-router';
-import { ThumbsUp, ThumbsDown, Share2, WifiOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { WifiOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import VideoPlayer from '@/components/VideoPlayer';
-import CommentSection from '@/components/CommentSection';
+import CommentSection, { CommentSectionRef } from '@/components/CommentSection';
 import FollowButton from '@/components/FollowButton';
+import WatchActionBar from '@/components/watch/WatchActionBar';
+import { useWatchShare } from '@/components/watch/useWatchShare';
 import { useMoodSignals } from '../hooks/useMoodSignals';
-import { useGetVideoMetadata } from '../hooks/useQueries';
-import { useState, useEffect } from 'react';
+import { useGetVideoMetadata, useGetVideoInteractionSummary, useGetVideoInteractionState, useUpdateVideoInteraction } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function WatchPage() {
   const { videoId } = useParams({ from: '/watch/$videoId' });
-  const [likes, setLikes] = useState(123);
-  const [dislikes, setDislikes] = useState(5);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isDisliked, setIsDisliked] = useState(false);
+  const { identity, login } = useInternetIdentity();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [watchStartTime] = useState(Date.now());
+  const [videoBlobUrl, setVideoBlobUrl] = useState<string | null>(null);
+  const commentSectionRef = useRef<CommentSectionRef>(null);
 
   const { data: videoMetadata, isLoading: metadataLoading, error: metadataError } = useGetVideoMetadata(videoId);
+  const { data: interactionSummary } = useGetVideoInteractionSummary(videoId);
+  const { data: interactionState } = useGetVideoInteractionState(videoId);
+  const updateInteractionMutation = useUpdateVideoInteraction();
   const { recordWatch, recordLike, recordActivity } = useMoodSignals();
+  const { share: shareVideo } = useWatchShare(videoId, videoMetadata?.title || 'Video');
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -56,61 +62,113 @@ export default function WatchPage() {
     views: 1234,
   };
 
-  const comments = [
-    {
-      id: '1',
-      author: 'John Doe',
-      authorId: 'user1',
-      content: 'Great video! Really enjoyed the content.',
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    },
-    {
-      id: '2',
-      author: 'Jane Smith',
-      authorId: 'user2',
-      content: 'Thanks for sharing this. Very informative!',
-      createdAt: new Date(Date.now() - 1000 * 60 * 60),
-    },
-  ];
+  const handleLike = async () => {
+    if (!identity) {
+      login();
+      return;
+    }
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes(likes - 1);
-      setIsLiked(false);
-    } else {
-      setLikes(likes + 1);
-      setIsLiked(true);
-      recordLike();
-      if (isDisliked) {
-        setDislikes(dislikes - 1);
-        setIsDisliked(false);
+    const newLiked = !interactionState?.liked;
+    const newDisliked = false; // Clear dislike when liking
+
+    try {
+      await updateInteractionMutation.mutateAsync({
+        videoId,
+        like: newLiked,
+        dislike: newDisliked,
+        saved: interactionState?.saved || false,
+      });
+      if (newLiked) {
+        recordLike();
       }
+    } catch (error: any) {
+      console.error('Failed to update like:', error);
+      toast.error('Failed to update like. Please try again.');
     }
   };
 
-  const handleDislike = () => {
-    if (isDisliked) {
-      setDislikes(dislikes - 1);
-      setIsDisliked(false);
-    } else {
-      setDislikes(dislikes + 1);
-      setIsDisliked(true);
-      if (isLiked) {
-        setLikes(likes - 1);
-        setIsLiked(false);
-      }
+  const handleDislike = async () => {
+    if (!identity) {
+      login();
+      return;
+    }
+
+    const newDisliked = !interactionState?.disliked;
+    const newLiked = false; // Clear like when disliking
+
+    try {
+      await updateInteractionMutation.mutateAsync({
+        videoId,
+        like: newLiked,
+        dislike: newDisliked,
+        saved: interactionState?.saved || false,
+      });
+    } catch (error: any) {
+      console.error('Failed to update dislike:', error);
+      toast.error('Failed to update dislike. Please try again.');
     }
   };
 
-  const handleShare = () => {
-    recordActivity();
-  };
+  const handleSave = async () => {
+    if (!identity) {
+      login();
+      return;
+    }
 
-  const handleFollow = () => {
-    recordActivity();
+    const newSaved = !interactionState?.saved;
+
+    try {
+      await updateInteractionMutation.mutateAsync({
+        videoId,
+        like: interactionState?.liked || false,
+        dislike: interactionState?.disliked || false,
+        saved: newSaved,
+      });
+      recordActivity();
+      toast.success(newSaved ? 'Video saved!' : 'Video removed from saved');
+    } catch (error: any) {
+      console.error('Failed to update save:', error);
+      toast.error('Failed to save video. Please try again.');
+    }
   };
 
   const handleComment = () => {
+    if (!identity) {
+      login();
+      return;
+    }
+    recordActivity();
+    // Focus the comment input
+    commentSectionRef.current?.focusInput();
+  };
+
+  const handleShare = async () => {
+    recordActivity();
+    await shareVideo();
+  };
+
+  const handleDownload = () => {
+    if (!videoBlobUrl) {
+      toast.error('Video not ready for download');
+      return;
+    }
+
+    try {
+      const link = document.createElement('a');
+      link.href = videoBlobUrl;
+      link.download = `${videoMetadata?.title || 'video'}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Download started!');
+      recordActivity();
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Failed to download video');
+    }
+  };
+
+  const handleFollow = () => {
     recordActivity();
   };
 
@@ -143,22 +201,27 @@ export default function WatchPage() {
           {metadataLoading ? (
             <Skeleton className="aspect-video w-full rounded-xl" />
           ) : metadataError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
-                Failed to load video metadata. The video may not exist or you may not have permission to view it.
-              </AlertDescription>
-            </Alert>
-          ) : (
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d97398]/10 via-[#8eb5c0]/10 to-[#5fc4d4]/10 p-8">
+                <Alert variant="destructive" className="max-w-md">
+                  <AlertDescription>
+                    Failed to load video metadata. The video may not exist or you may not have permission to view it.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </div>
+          ) : videoMetadata ? (
             <VideoPlayer
               videoId={videoId}
-              title={videoMetadata?.title || 'Video'}
+              title={videoMetadata.title}
               isOffline={isOffline}
-              metadata={videoMetadata ? {
+              metadata={{
                 totalChunks: Number(videoMetadata.totalChunks),
                 chunkSize: Number(videoMetadata.chunkSize),
-              } : undefined}
+              }}
+              onBlobUrlReady={setVideoBlobUrl}
             />
-          )}
+          ) : null}
 
           <div className="mt-4 space-y-4">
             {metadataLoading ? (
@@ -166,6 +229,12 @@ export default function WatchPage() {
                 <Skeleton className="h-8 w-3/4" />
                 <Skeleton className="h-20 w-full" />
               </>
+            ) : metadataError ? (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Failed to load video information. Please try again later.
+                </AlertDescription>
+              </Alert>
             ) : videoMetadata ? (
               <>
                 <div className="flex items-start justify-between gap-4">
@@ -173,6 +242,25 @@ export default function WatchPage() {
                   {getResolutionBadge(videoMetadata.resolution)}
                 </div>
 
+                {/* Action Bar */}
+                <WatchActionBar
+                  likeCount={Number(interactionSummary?.likeCount || 0n)}
+                  dislikeCount={Number(interactionSummary?.dislikeCount || 0n)}
+                  commentCount={Number(interactionSummary?.commentCount || 0n)}
+                  savedCount={Number(interactionSummary?.savedCount || 0n)}
+                  isLiked={interactionState?.liked || false}
+                  isDisliked={interactionState?.disliked || false}
+                  isSaved={interactionState?.saved || false}
+                  onLike={handleLike}
+                  onDislike={handleDislike}
+                  onComment={handleComment}
+                  onShare={handleShare}
+                  onSave={handleSave}
+                  onDownload={handleDownload}
+                  isLoading={updateInteractionMutation.isPending}
+                />
+
+                {/* Channel Info */}
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Link to="/channel/$channelId" params={{ channelId: mockData.channelId }}>
@@ -193,33 +281,6 @@ export default function WatchPage() {
                       <FollowButton channelId={mockData.channelId} isFollowing={false} />
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center rounded-full bg-secondary">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`rounded-l-full ${isLiked ? 'text-primary' : ''}`}
-                        onClick={handleLike}
-                      >
-                        <ThumbsUp className="mr-2 h-4 w-4" />
-                        {likes}
-                      </Button>
-                      <Separator orientation="vertical" className="h-6" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`rounded-r-full ${isDisliked ? 'text-primary' : ''}`}
-                        onClick={handleDislike}
-                      >
-                        <ThumbsDown className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button variant="secondary" size="sm" className="rounded-full" onClick={handleShare}>
-                      <Share2 className="mr-2 h-4 w-4" />
-                      Share
-                    </Button>
-                  </div>
                 </div>
 
                 <div className="rounded-xl bg-secondary/50 p-4">
@@ -230,17 +291,11 @@ export default function WatchPage() {
                   <p className="mt-2 text-sm text-foreground">{videoMetadata.description || 'No description provided.'}</p>
                 </div>
               </>
-            ) : (
-              <Alert>
-                <AlertDescription>Video not found.</AlertDescription>
-              </Alert>
-            )}
+            ) : null}
 
             <Separator />
 
-            <div onClick={handleComment}>
-              <CommentSection videoId={videoId} comments={comments} />
-            </div>
+            <CommentSection ref={commentSectionRef} videoId={videoId} />
           </div>
         </div>
 

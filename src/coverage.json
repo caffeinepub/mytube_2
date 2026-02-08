@@ -1,39 +1,37 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T12:27:46.977Z",
+  "generatedAt": "2026-02-08T10:18:20.560Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 1,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-36",
-        "summary": "Add a user-accessible Light Mode / Dark Mode toggle that switches the app theme by controlling the existing `next-themes` `ThemeProvider` (class-based `.dark`) and applies consistently across the entire UI.",
+        "id": "REQ-1",
+        "summary": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/account/ThemeToggleMenuItems.tsx",
-          "frontend/src/components/account/ProfileMenu.tsx",
-          "frontend/src/App.tsx"
+          "frontend/tailwind.config.js",
+          "frontend/src/components/BottomNav.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/account/ThemeToggleMenuItems.tsx",
-          "frontend/src/components/account/ProfileMenu.tsx",
-          "frontend/src/App.tsx"
+          "frontend/tailwind.config.js"
         ]
       },
       {
-        "id": "REQ-37",
-        "summary": "Ensure the default theme behavior is well-defined and does not break existing styling: keep current default theme behavior unless explicitly changed as part of implementing the toggle, and ensure both Light and Dark themes have readable contrast for core surfaces (background, card, border, text).",
-        "status": "missing",
+        "id": "REQ-2",
+        "summary": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/Layout.tsx"
+          "frontend/tailwind.config.js"
         ],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/tailwind.config.js"
+        ]
       }
     ]
   },
@@ -42,9 +40,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/account/ProfileMenu.tsx",
-    "frontend/src/components/account/ThemeToggleMenuItems.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

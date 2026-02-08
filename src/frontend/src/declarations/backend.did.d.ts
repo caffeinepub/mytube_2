@@ -10,6 +10,27 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Comment {
+  'id' : CommentId,
+  'text' : string,
+  'author' : Principal,
+  'timestamp' : bigint,
+  'videoId' : VideoId,
+}
+export type CommentId = bigint;
+export interface CommentsList {
+  'totalCount' : bigint,
+  'comments' : Array<Comment>,
+}
+export interface CreatedCommentEvent {
+  'commentId' : CommentId,
+  'timestamp' : bigint,
+}
+export interface InteractionState {
+  'liked' : boolean,
+  'saved' : boolean,
+  'disliked' : boolean,
+}
 export type Mood = { 'sad' : null } |
   { 'happy' : null } |
   { 'chill' : null } |
@@ -46,6 +67,18 @@ export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export type VideoId = string;
+export interface VideoInteractionRequest {
+  'like' : boolean,
+  'saved' : boolean,
+  'dislike' : boolean,
+  'videoId' : VideoId,
+}
+export interface VideoInteractionSummary {
+  'dislikeCount' : bigint,
+  'likeCount' : bigint,
+  'commentCount' : bigint,
+  'savedCount' : bigint,
+}
 export interface VideoMetadata {
   'id' : VideoId,
   'title' : string,
@@ -85,15 +118,29 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addShort' : ActorMethod<[string, string, bigint, Array<Mood>], undefined>,
+  'addComment' : ActorMethod<[VideoId, string], CreatedCommentEvent>,
+  'addShortAdmin' : ActorMethod<
+    [string, string, bigint, Array<Mood>],
+    undefined
+  >,
+  'addShortUser' : ActorMethod<
+    [string, string, bigint, Array<Mood>],
+    undefined
+  >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getCommentsForVideo' : ActorMethod<[VideoId, bigint, bigint], CommentsList>,
   'getMoodHistory' : ActorMethod<[], Array<Mood>>,
   'getMoodPreferences' : ActorMethod<[], UserPreferences>,
   'getRecommendedShorts' : ActorMethod<[], Array<Short>>,
   'getShorts' : ActorMethod<[], Array<Short>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getVideoInteractionState' : ActorMethod<[VideoId], InteractionState>,
+  'getVideoInteractionSummary' : ActorMethod<
+    [VideoId],
+    VideoInteractionSummary
+  >,
   'getVideoMetadata' : ActorMethod<[VideoId], VideoMetadata>,
   'getVideoMetadataList' : ActorMethod<[], Array<VideoMetadata>>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
@@ -105,6 +152,7 @@ export interface _SERVICE {
       { 'chunks' : Array<StreamChunk> }
   >,
   'updateMoodPreferences' : ActorMethod<[boolean, Mood], undefined>,
+  'updateVideoInteraction' : ActorMethod<[VideoInteractionRequest], undefined>,
   'uploadVideoChunk' : ActorMethod<
     [VideoId, bigint, Uint8Array, bigint],
     undefined

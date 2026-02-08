@@ -89,10 +89,16 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface InteractionState {
+    liked: boolean;
+    saved: boolean;
+    disliked: boolean;
+}
 export interface UserPreferences {
     moodAIEnabled: boolean;
     currentMood: Mood;
 }
+export type CommentId = bigint;
 export interface Short {
     moods: Array<Mood>;
     title: string;
@@ -100,18 +106,39 @@ export interface Short {
     likes: bigint;
     videoUrl: string;
 }
+export interface Comment {
+    id: CommentId;
+    text: string;
+    author: Principal;
+    timestamp: bigint;
+    videoId: VideoId;
+}
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
+}
+export interface _CaffeineStorageCreateCertificateResult {
+    method: string;
+    blob_hash: string;
+}
+export interface CommentsList {
+    totalCount: bigint;
+    comments: Array<Comment>;
+}
+export interface CreatedCommentEvent {
+    commentId: CommentId;
+    timestamp: bigint;
+}
+export interface VideoInteractionSummary {
+    dislikeCount: bigint;
+    likeCount: bigint;
+    commentCount: bigint;
+    savedCount: bigint;
 }
 export type VideoId = string;
 export interface StreamChunk {
     chunkNumber: bigint;
     data: Uint8Array;
     size: bigint;
-}
-export interface _CaffeineStorageCreateCertificateResult {
-    method: string;
-    blob_hash: string;
 }
 export interface VideoMetadata {
     id: VideoId;
@@ -124,6 +151,16 @@ export interface VideoMetadata {
     chunkSize: bigint;
     uploadedBy: Principal;
 }
+export interface VideoInteractionRequest {
+    like: boolean;
+    saved: boolean;
+    dislike: boolean;
+    videoId: VideoId;
+}
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
+}
 export interface UserProfile {
     bio: string;
     username: string;
@@ -135,10 +172,6 @@ export interface UserProfile {
     youtube: string;
     bannerUrl: string;
     profilePhotoUrl: string;
-}
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
 }
 export enum Mood {
     sad = "sad",
@@ -159,15 +192,20 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
-    addShort(title: string, videoUrl: string, duration: bigint, moods: Array<Mood>): Promise<void>;
+    addComment(videoId: VideoId, text: string): Promise<CreatedCommentEvent>;
+    addShortAdmin(title: string, videoUrl: string, duration: bigint, moods: Array<Mood>): Promise<void>;
+    addShortUser(title: string, videoUrl: string, duration: bigint, moods: Array<Mood>): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getCommentsForVideo(videoId: VideoId, _skip: bigint, _limit: bigint): Promise<CommentsList>;
     getMoodHistory(): Promise<Array<Mood>>;
     getMoodPreferences(): Promise<UserPreferences>;
     getRecommendedShorts(): Promise<Array<Short>>;
     getShorts(): Promise<Array<Short>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getVideoInteractionState(videoId: VideoId): Promise<InteractionState>;
+    getVideoInteractionSummary(videoId: VideoId): Promise<VideoInteractionSummary>;
     getVideoMetadata(id: VideoId): Promise<VideoMetadata>;
     getVideoMetadataList(): Promise<Array<VideoMetadata>>;
     isCallerAdmin(): Promise<boolean>;
@@ -181,6 +219,7 @@ export interface backendInterface {
         chunks: Array<StreamChunk>;
     }>;
     updateMoodPreferences(moodAIEnabled: boolean, currentMood: Mood): Promise<void>;
+    updateVideoInteraction(request: VideoInteractionRequest): Promise<void>;
     uploadVideoChunk(videoId: VideoId, chunkNumber: bigint, data: Uint8Array, size: bigint): Promise<void>;
     uploadVideoMetadata(id: VideoId, title: string, description: string, durationSeconds: bigint, resolution: string, totalChunks: bigint, chunkSize: bigint, uploadTimestamp: bigint): Promise<void>;
 }
@@ -285,17 +324,45 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async addShort(arg0: string, arg1: string, arg2: bigint, arg3: Array<Mood>): Promise<void> {
+    async addComment(arg0: VideoId, arg1: string): Promise<CreatedCommentEvent> {
         if (this.processError) {
             try {
-                const result = await this.actor.addShort(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
+                const result = await this.actor.addComment(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.addShort(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
+            const result = await this.actor.addComment(arg0, arg1);
+            return result;
+        }
+    }
+    async addShortAdmin(arg0: string, arg1: string, arg2: bigint, arg3: Array<Mood>): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addShortAdmin(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addShortAdmin(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
+            return result;
+        }
+    }
+    async addShortUser(arg0: string, arg1: string, arg2: bigint, arg3: Array<Mood>): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addShortUser(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addShortUser(arg0, arg1, arg2, to_candid_vec_n8(this._uploadFile, this._downloadFile, arg3));
             return result;
         }
     }
@@ -339,6 +406,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getCallerUserRole();
             return from_candid_UserRole_n14(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCommentsForVideo(arg0: VideoId, arg1: bigint, arg2: bigint): Promise<CommentsList> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCommentsForVideo(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCommentsForVideo(arg0, arg1, arg2);
+            return result;
         }
     }
     async getMoodHistory(): Promise<Array<Mood>> {
@@ -409,6 +490,34 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n13(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getVideoInteractionState(arg0: VideoId): Promise<InteractionState> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getVideoInteractionState(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getVideoInteractionState(arg0);
+            return result;
+        }
+    }
+    async getVideoInteractionSummary(arg0: VideoId): Promise<VideoInteractionSummary> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getVideoInteractionSummary(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getVideoInteractionSummary(arg0);
+            return result;
         }
     }
     async getVideoMetadata(arg0: VideoId): Promise<VideoMetadata> {
@@ -512,6 +621,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateMoodPreferences(arg0, to_candid_Mood_n9(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async updateVideoInteraction(arg0: VideoInteractionRequest): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateVideoInteraction(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateVideoInteraction(arg0);
             return result;
         }
     }

@@ -2,12 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-user-accessible-light-mode-dark-mode-toggle-that-switches-the-app-theme-by-controlling-the-existing-next-themes-themeprovider-class-based-dark-and-applies-consistently-across-the-entire-ui",
-      "featureTitle": "Add a user-accessible Light Mode / Dark Mode toggle that switches the app theme by controlling the existing `next-themes` `ThemeProvider` (class-based `.dark`) and applies consistently across the entire UI.",
+      "featureId": "feature-update-the-mobile-bottom-navigation-bar-container-the-strip-behind-the-icons-to-use-a-clearly-visible-non-transparent-background-color-of-1a1a1a-while-keeping-the-existing-per-button-background-styling-and-active-state-highlight-behavior-unchanged",
+      "featureTitle": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/account/ProfileMenu.tsx",
-        "frontend/src/components/account/ThemeToggleMenuItems.tsx"
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -19,7 +17,27 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-36"
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-styling-implementation-so-the-bottom-tab-bar-background-color-change-reliably-applies-i-e-ensure-the-tailwind-color-token-used-by-bottomnav-resolves-to-the-intended-color-instead-of-being-ignored-due-to-incompatible-css-variable-formatting",
+      "featureTitle": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+      "files": [
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
       ],
       "confidence": "high"
     }

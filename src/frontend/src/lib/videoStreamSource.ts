@@ -9,8 +9,6 @@ export class VideoStreamSource {
   private actor: backendInterface;
   private totalChunks: number;
   private chunkSize: number;
-  private currentChunk: number = 0;
-  private buffer: Uint8Array[] = [];
 
   constructor(
     videoId: VideoId,
@@ -25,7 +23,8 @@ export class VideoStreamSource {
   }
 
   /**
-   * Fetches a range of chunks from the backend.
+   * Fetches a range of chunks from the backend and returns them sorted by chunkNumber.
+   * Validates that all requested chunks are present and contiguous.
    */
   async fetchChunks(startChunk: number, endChunk: number): Promise<Uint8Array[]> {
     try {
@@ -36,13 +35,53 @@ export class VideoStreamSource {
       );
 
       if (result.__kind__ === 'error') {
-        throw new Error(result.error);
+        throw new Error(`Failed to load video. Please try again.`);
       }
 
-      return result.chunks.map((chunk: StreamChunk) => chunk.data);
-    } catch (error) {
+      const chunks = result.chunks;
+
+      // Validate we received chunks
+      if (!chunks || chunks.length === 0) {
+        throw new Error('Failed to load video. Please try again.');
+      }
+
+      // Sort chunks by chunkNumber ascending
+      const sortedChunks = [...chunks].sort((a, b) => {
+        const aNum = Number(a.chunkNumber);
+        const bNum = Number(b.chunkNumber);
+        return aNum - bNum;
+      });
+
+      // Validate contiguous range: we should have exactly (endChunk - startChunk + 1) chunks
+      const expectedCount = endChunk - startChunk + 1;
+      if (sortedChunks.length !== expectedCount) {
+        throw new Error('Failed to load video. Please try again.');
+      }
+
+      // Validate chunk numbers are contiguous and match the requested range
+      for (let i = 0; i < sortedChunks.length; i++) {
+        const expectedChunkNumber = startChunk + i;
+        const actualChunkNumber = Number(sortedChunks[i].chunkNumber);
+        
+        if (actualChunkNumber !== expectedChunkNumber) {
+          throw new Error('Failed to load video. Please try again.');
+        }
+
+        // Validate chunk has data
+        if (!sortedChunks[i].data || sortedChunks[i].data.length === 0) {
+          throw new Error('Failed to load video. Please try again.');
+        }
+      }
+
+      // Return sorted chunk data
+      return sortedChunks.map((chunk: StreamChunk) => chunk.data);
+    } catch (error: any) {
       console.error('Error fetching video chunks:', error);
-      throw error;
+      // Re-throw with user-facing message
+      if (error.message === 'Failed to load video. Please try again.') {
+        throw error;
+      }
+      throw new Error('Failed to load video. Please try again.');
     }
   }
 

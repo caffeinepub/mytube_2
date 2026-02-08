@@ -78,7 +78,7 @@ export default function UploadPage() {
           <CardTitle>Upload Video</CardTitle>
           <CardDescription>Share your content with the mytube community. Supports high-resolution videos up to 8K.</CardDescription>
           <div className="pt-2">
-            <Link to="/upload/short">
+            <Link to="/upload-short">
               <Button variant="outline" size="sm">
                 Upload Short Instead
               </Button>

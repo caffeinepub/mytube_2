@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add a Light Mode / Dark Mode theme toggle that controls the existing `next-themes` ThemeProvider and applies across the entire UI.
+**Goal:** Make the mobile bottom tab bar strip (container behind the icons) use a clearly visible, non-transparent #1a1a1a background, and ensure the change reliably applies.
 
 **Planned changes:**
-- Add a user-accessible theme toggle in the UI with English labels (e.g., “Theme”, “Light”, “Dark”).
-- Wire the toggle to `next-themes` so it updates the document class (`.dark`) and applies Tailwind dark-mode styles immediately across pages/components.
-- Ensure the selected theme persists across reloads via `next-themes` persistence and that both themes remain readable for core surfaces (background, card, borders, text) using existing CSS variables.
+- Update the md:hidden BottomNav container/strip styling to render with background color #1a1a1a while keeping existing per-button background styling unchanged.
+- Preserve existing active tab highlight behavior (active text-primary and icon fill-primary).
+- Fix the styling/token usage so the BottomNav background color is not ignored (e.g., due to incompatible CSS variable formatting) and remains consistent across routes.
 
-**User-visible outcome:** Users can switch between Light and Dark themes from within the app, and their selection stays applied after refreshing or revisiting the app.
+**User-visible outcome:** On mobile, the bottom navigation strip behind the icons is visibly darker (#1a1a1a) and consistently applied on all pages, while button and active-state styling stays the same.

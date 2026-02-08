@@ -27,6 +27,8 @@
     --radius: 0.5rem;
     --success: oklch(60% 0.15 150);
     --warning: oklch(70% 0.15 80);
+    --bottom-nav-button: oklch(88% 0.02 280);
+    --bottom-nav-bar: oklch(18% 0.02 280);
   }
 
   .dark {
@@ -51,6 +53,8 @@
     --ring: oklch(70% 0.15 340);
     --success: oklch(60% 0.15 150);
     --warning: oklch(70% 0.15 80);
+    --bottom-nav-button: oklch(22% 0.02 280);
+    --bottom-nav-bar: oklch(18% 0.02 280);
   }
 }
 

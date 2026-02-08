@@ -1,53 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Add Light Mode / Dark Mode theme toggle",
+  "title": "Make mobile bottom tab bar strip background #1a1a1a",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-36",
-      "text": "Add a user-accessible Light Mode / Dark Mode toggle that switches the app theme by controlling the existing `next-themes` `ThemeProvider` (class-based `.dark`) and applies consistently across the entire UI.",
+      "id": "REQ-1",
+      "text": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-8"
         ],
         "quotes": [
-          "janedo anhi only. Light Mode / Dark Mode add karo bas"
+          "1. #1a1a1a.  2. neeche icons ke peeche wali background strip.  3. halka shade change",
+          "build karo"
         ]
       },
       "acceptanceCriteria": [
-        "A theme toggle is available in the app UI and labeled in English (e.g., \"Theme\", \"Light\", \"Dark\").",
-        "Toggling updates the document theme class so Tailwind dark-mode styles apply immediately across pages/components.",
-        "The selected theme persists across page reloads (via `next-themes` persistence).",
-        "No backend changes are required for the theme toggle to work."
+        "On mobile (md:hidden BottomNav), the bar behind the icons renders with background color #1a1a1a (visibly darker than before).",
+        "The icon/button backgrounds (bg-bottom-nav-button) remain the same as before.",
+        "Active tab styling remains the same as before (active text-primary and icon fill-primary).",
+        "The background color is not transparent and is visually consistent across routes."
       ]
     },
     {
-      "id": "REQ-37",
-      "text": "Ensure the default theme behavior is well-defined and does not break existing styling: keep current default theme behavior unless explicitly changed as part of implementing the toggle, and ensure both Light and Dark themes have readable contrast for core surfaces (background, card, border, text).",
+      "id": "REQ-2",
+      "text": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-5",
+          "msg-8"
         ],
         "quotes": [
-          "Light Mode / Dark Mode add karo bas"
+          "KAHA HU KUCH BHI NHI HU TAB BAR KE STRIP ME KUCH BHI CHANGE NHI CHANGE DEKHA RAHA HAI TUME PHOTO ME KUCH BHI CHANGE NHI HUVA HAI",
+          "1. #1a1a1a.  2. neeche icons ke peeche wali background strip.  3. halka shade change"
         ]
       },
       "acceptanceCriteria": [
-        "On first load, the app still renders with a valid theme (no flash of unstyled/incorrect theme beyond normal `next-themes` behavior).",
-        "In Light mode and Dark mode, core surfaces (`bg-background`, `bg-card`, borders, `text-foreground`) remain legible and consistent with the existing CSS variables in `frontend/src/index.css`."
+        "After implementation, changing the bottom-nav bar color results in an observable UI difference in the running app (not just in code).",
+        "No regressions to other theme colors outside the bottom navigation bar strip."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutablePaths must not be edited: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Keep the backend as a single Motoko actor; no backend work is needed for this request."
+    "Backend must remain unchanged (no canister changes required).",
+    "Do not edit any files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Do not change navigation bar transparency or colors (user deferred that request).",
-    "Do not add localization/Hindi UI changes as part of this task.",
-    "Do not add new notification features or other settings beyond the theme toggle."
+    "Redesigning the entire theme or changing primary/secondary colors.",
+    "Changing BottomNav layout, labels, routes, or icon set.",
+    "Adding new navigation items or new pages."
   ],
   "imageRequirements": {
     "required": [],

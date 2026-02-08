@@ -1,22 +1,20 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import List "mo:core/List";
-import Text "mo:core/Text";
 import Array "mo:core/Array";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-import Order "mo:core/Order";
+import Time "mo:core/Time";
+import Int "mo:core/Int";
 import Iter "mo:core/Iter";
 
 import MixinStorage "blob-storage/Mixin";
-import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-
-
 actor {
-  type VideoId = Text; // Unique video identifier.
+  type VideoId = Text;
+  type CommentId = Nat;
 
   public type VideoChunk = {
     chunkNumber : Nat;
@@ -37,7 +35,7 @@ actor {
     durationSeconds : Nat;
     resolution : Text;
     totalChunks : Nat;
-    chunkSize : Nat; // Each chunk's size.
+    chunkSize : Nat;
     uploadedBy : Principal;
     uploadTimestamp : Nat;
   };
@@ -75,18 +73,175 @@ actor {
     facebook : Text;
   };
 
+  public type Comment = {
+    id : CommentId;
+    videoId : VideoId;
+    author : Principal;
+    text : Text;
+    timestamp : Nat;
+  };
+
+  public type InteractionState = {
+    liked : Bool;
+    disliked : Bool;
+    saved : Bool;
+  };
+
+  public type VideoInteractionSummary = {
+    likeCount : Nat;
+    dislikeCount : Nat;
+    commentCount : Nat;
+    savedCount : Nat;
+  };
+
+  public type VideoInteractionRequest = {
+    videoId : VideoId;
+    like : Bool;
+    dislike : Bool;
+    saved : Bool;
+  };
+
+  public type CreatedCommentEvent = {
+    commentId : CommentId;
+    timestamp : Nat;
+  };
+
+  public type CommentsList = {
+    comments : [Comment];
+    totalCount : Nat;
+  };
+
   let videoMetadataStore = Map.empty<VideoId, VideoMetadata>();
-  let videoChunksStore = Map.empty<VideoId, List.List<VideoChunk>>();
+  let videoChunksStore = Map.empty<VideoId, Map.Map<Nat, VideoChunk>>();
   let shorts = List.empty<Short>();
   let userPreferences = Map.empty<Principal, UserPreferences>();
   let userMoodHistory = Map.empty<Principal, List.List<Mood>>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let commentsStore = Map.empty<CommentId, Comment>();
+  let videoInteractions = Map.empty<VideoId, Map.Map<Principal, InteractionState>>();
   let accessControlState = AccessControl.initState();
+
+  var nextCommentId : CommentId = 1;
 
   include MixinStorage();
   include MixinAuthorization(accessControlState);
 
-  // User profile management (required by frontend)
+  private func getCommentCountForVideo(videoId : VideoId) : Nat {
+    var count = 0;
+    for ((_, comment) in commentsStore.entries()) {
+      if (comment.videoId == videoId) {
+        count += 1;
+      };
+    };
+    count;
+  };
+
+  public query ({ caller = _ }) func getVideoInteractionSummary(videoId : VideoId) : async VideoInteractionSummary {
+    switch (videoInteractions.get(videoId)) {
+      case (?interactions) {
+        var likeCount = 0;
+        var dislikeCount = 0;
+        var savedCount = 0;
+        for ((_, interaction) in interactions.entries()) {
+          if (interaction.liked) {
+            likeCount += 1;
+          };
+          if (interaction.disliked) {
+            dislikeCount += 1;
+          };
+          if (interaction.saved) {
+            savedCount += 1;
+          };
+        };
+        let commentCount = getCommentCountForVideo(videoId);
+        {
+          likeCount;
+          dislikeCount;
+          commentCount;
+          savedCount;
+        };
+      };
+      case (null) {
+        {
+          likeCount = 0;
+          dislikeCount = 0;
+          commentCount = getCommentCountForVideo(videoId);
+          savedCount = 0;
+        };
+      };
+    };
+  };
+
+  public query ({ caller }) func getVideoInteractionState(videoId : VideoId) : async InteractionState {
+    switch (videoInteractions.get(videoId)) {
+      case (?interactions) {
+        switch (interactions.get(caller)) {
+          case (?state) { state };
+          case (null) { { liked = false; disliked = false; saved = false } };
+        };
+      };
+      case (null) {
+        { liked = false; disliked = false; saved = false };
+      };
+    };
+  };
+
+  public shared ({ caller }) func updateVideoInteraction(request : VideoInteractionRequest) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can interact with videos");
+    };
+
+    let newState : InteractionState = {
+      liked = request.like;
+      disliked = request.dislike;
+      saved = request.saved;
+    };
+
+    switch (videoInteractions.get(request.videoId)) {
+      case (?interactions) {
+        interactions.add(caller, newState);
+      };
+      case (null) {
+        let newInteractions = Map.empty<Principal, InteractionState>();
+        newInteractions.add(caller, newState);
+        videoInteractions.add(request.videoId, newInteractions);
+      };
+    };
+  };
+
+  public shared ({ caller }) func addComment(videoId : VideoId, text : Text) : async CreatedCommentEvent {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can comment on videos");
+    };
+    let comment : Comment = {
+      id = nextCommentId;
+      videoId;
+      author = caller;
+      text;
+      timestamp = Int.abs(Time.now());
+    };
+    commentsStore.add(nextCommentId, comment);
+    let commentId = nextCommentId;
+    nextCommentId += 1;
+    { commentId; timestamp = comment.timestamp };
+  };
+
+  public query ({ caller = _ }) func getCommentsForVideo(
+    videoId : VideoId,
+    _skip : Nat,
+    _limit : Nat,
+  ) : async CommentsList {
+    let filteredComments = commentsStore.filter(
+      func(_id, comment) {
+        comment.videoId == videoId;
+      }
+    );
+    let commentsList = filteredComments.values();
+    let totalCount = commentsList.size();
+    let commentsArray = commentsList.toArray();
+    { comments = commentsArray; totalCount };
+  };
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
@@ -108,8 +263,21 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Content management - Admin only
-  public shared ({ caller }) func addShort(title : Text, videoUrl : Text, duration : Nat, moods : [Mood]) : async () {
+  public shared ({ caller }) func addShortUser(title : Text, videoUrl : Text, duration : Nat, moods : [Mood]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add shorts");
+    };
+    let short : Short = {
+      title;
+      videoUrl;
+      duration;
+      likes = 0;
+      moods;
+    };
+    shorts.add(short);
+  };
+
+  public shared ({ caller }) func addShortAdmin(title : Text, videoUrl : Text, duration : Nat, moods : [Mood]) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add shorts");
     };
@@ -123,12 +291,10 @@ actor {
     shorts.add(short);
   };
 
-  // Public query - accessible to all including guests
-  public query ({ caller }) func getShorts() : async [Short] {
+  public query ({ caller = _ }) func getShorts() : async [Short] {
     shorts.toArray();
   };
 
-  // User mood preferences - User only
   public shared ({ caller }) func updateMoodPreferences(moodAIEnabled : Bool, currentMood : Mood) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update mood preferences");
@@ -152,7 +318,6 @@ actor {
     };
   };
 
-  // User mood history - User only
   public shared ({ caller }) func recordMood(mood : Mood) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can record mood");
@@ -161,7 +326,6 @@ actor {
       case (?history) { history };
       case (null) { List.empty<Mood>() };
     };
-
     // Remove oldest entry if there are already 10 moods
     if (existingHistory.size() >= 10) {
       let iterator = existingHistory.values();
@@ -172,7 +336,6 @@ actor {
         };
       };
     };
-
     existingHistory.add(mood);
     userMoodHistory.add(caller, existingHistory);
   };
@@ -187,7 +350,6 @@ actor {
     };
   };
 
-  // Personalized recommendations - User only
   public query ({ caller }) func getRecommendedShorts() : async [Short] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can get personalized recommendations");
@@ -198,16 +360,14 @@ actor {
         Runtime.trap("No mood preferences found for caller");
       };
     };
-
     let preferredMood = if (preferences.moodAIEnabled) {
       switch (userMoodHistory.get(caller)) {
         case (?history) { history.last() };
         case (null) { ?preferences.currentMood };
       };
     } else { ?preferences.currentMood };
-
     switch (preferredMood) {
-      case (null) { shorts.toArray() }; // No specific mood, return all shorts
+      case (null) { shorts.toArray() };
       case (?mood) {
         let recommended = shorts.filter(
           func(short) {
@@ -221,7 +381,6 @@ actor {
     };
   };
 
-  // Video upload and streaming functionality
   public shared ({ caller }) func uploadVideoMetadata(
     id : VideoId,
     title : Text,
@@ -236,11 +395,9 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can upload videos");
     };
-
     if (videoMetadataStore.containsKey(id)) {
       Runtime.trap("VideoId already exists. Please use a unique id.");
     };
-
     let metadata : VideoMetadata = {
       id;
       title;
@@ -252,9 +409,8 @@ actor {
       uploadedBy = caller;
       uploadTimestamp;
     };
-
     videoMetadataStore.add(id, metadata);
-    videoChunksStore.add(id, List.empty<VideoChunk>());
+    videoChunksStore.add(id, Map.empty<Nat, VideoChunk>());
   };
 
   public shared ({ caller }) func uploadVideoChunk(
@@ -267,7 +423,6 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can upload video chunks");
     };
-
     switch (videoMetadataStore.get(videoId)) {
       case (null) {
         Runtime.trap("No such videoId found. Please upload metadata first.");
@@ -277,23 +432,23 @@ actor {
         if (metadata.uploadedBy != caller and not AccessControl.isAdmin(accessControlState, caller)) {
           Runtime.trap("Unauthorized: Only the video owner can upload chunks to this video");
         };
-
         let newChunk : VideoChunk = { chunkNumber; data; size };
-
         switch (videoChunksStore.get(videoId)) {
           case (null) {
-            videoChunksStore.add(videoId, List.fromArray<VideoChunk>([newChunk]));
+            let newChunkStore = Map.empty<Nat, VideoChunk>();
+            newChunkStore.add(chunkNumber, newChunk);
+            videoChunksStore.add(videoId, newChunkStore);
           };
           case (?existingChunks) {
-            existingChunks.add(newChunk);
+            // Always overwrite existing chunks to ensure deterministic behavior
+            existingChunks.add(chunkNumber, newChunk);
           };
         };
       };
     };
   };
 
-  // Public query - anyone can view video metadata
-  public query ({ caller }) func getVideoMetadata(id : VideoId) : async VideoMetadata {
+  public query ({ caller = _ }) func getVideoMetadata(id : VideoId) : async VideoMetadata {
     switch (videoMetadataStore.get(id)) {
       case (?metadata) { metadata };
       case (null) {
@@ -302,14 +457,12 @@ actor {
     };
   };
 
-  // Public query - anyone can list videos
-  public query ({ caller }) func getVideoMetadataList() : async [VideoMetadata] {
+  public query ({ caller = _ }) func getVideoMetadataList() : async [VideoMetadata] {
     let iter = videoMetadataStore.values();
     iter.toArray();
   };
 
-  // Public streaming - anyone can stream videos
-  public shared ({ caller }) func streamVideo(
+  public shared ({ caller = _ }) func streamVideo(
     id : VideoId,
     startChunk : Nat,
     endChunk : Nat,
@@ -319,30 +472,30 @@ actor {
   } {
     switch (videoChunksStore.get(id)) {
       case (null) { #error("No video chunks found for id " # id) };
-      case (?chunks) {
-        let filteredChunks = chunks.filter(
-          func(chunk) {
-            chunk.chunkNumber >= startChunk and chunk.chunkNumber <= endChunk
-          }
-        );
+      case (?chunksStore) {
+        // Fetch all requested chunk numbers in range
+        let mutableChunks : List.List<StreamChunk> = List.empty<StreamChunk>();
 
-        let sortedChunks = filteredChunks.toArray().sort(
-          func(a, b) {
-            Nat.compare(a.chunkNumber, b.chunkNumber);
-          }
-        );
-
-        let resultChunks = sortedChunks.map(
-          func(chunk) {
-            {
-              chunkNumber = chunk.chunkNumber;
-              data = chunk.data;
-              size = chunk.size;
+        var currentChunk = startChunk;
+        // Use while loop instead of try-catch to avoid throwing error
+        while (currentChunk <= endChunk) {
+          switch (chunksStore.get(currentChunk)) {
+            case (null) {
+              return #error("Missing chunk at chunkNumber " # currentChunk.toText());
             };
-          }
-        );
-
-        #chunks(resultChunks);
+            case (?chunk) {
+              let streamChunk : StreamChunk = {
+                chunkNumber = chunk.chunkNumber;
+                data = chunk.data;
+                size = chunk.size;
+              };
+              mutableChunks.add(streamChunk);
+            };
+          };
+          currentChunk += 1;
+        };
+        // All chunks in range found, convert to array and return
+        #chunks(mutableChunks.toArray());
       };
     };
   };

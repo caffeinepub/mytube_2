@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Short, UserPreferences, Mood, UserProfile, VideoMetadata } from '../backend';
+import type { Short, UserPreferences, Mood, UserProfile, VideoMetadata, VideoInteractionSummary, InteractionState, Comment, CommentsList } from '../backend';
 import { Principal } from '@dfinity/principal';
 
 // Placeholder hooks for future backend integration
@@ -38,16 +38,11 @@ export function useGetVideo(videoId: string) {
 export function useGetVideoMetadata(videoId: string) {
   const { actor, isFetching } = useActor();
 
-  return useQuery<VideoMetadata | null>({
+  return useQuery<VideoMetadata>({
     queryKey: ['videoMetadata', videoId],
     queryFn: async () => {
-      if (!actor) return null;
-      try {
-        return await actor.getVideoMetadata(videoId);
-      } catch (error: any) {
-        console.error('Error fetching video metadata:', error);
-        return null;
-      }
+      if (!actor) throw new Error('Actor not available');
+      return await actor.getVideoMetadata(videoId);
     },
     enabled: !!actor && !isFetching && !!videoId,
     retry: false,
@@ -65,6 +60,154 @@ export function useGetVideoMetadataList() {
         return await actor.getVideoMetadataList();
       } catch (error: any) {
         console.error('Error fetching video list:', error);
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Video Interaction Queries
+export function useGetVideoInteractionSummary(videoId: string) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<VideoInteractionSummary>({
+    queryKey: ['videoInteractionSummary', videoId],
+    queryFn: async () => {
+      if (!actor) {
+        return {
+          likeCount: 0n,
+          dislikeCount: 0n,
+          commentCount: 0n,
+          savedCount: 0n,
+        };
+      }
+      try {
+        return await actor.getVideoInteractionSummary(videoId);
+      } catch (error: any) {
+        console.error('Error fetching interaction summary:', error);
+        return {
+          likeCount: 0n,
+          dislikeCount: 0n,
+          commentCount: 0n,
+          savedCount: 0n,
+        };
+      }
+    },
+    enabled: !!actor && !isFetching && !!videoId,
+  });
+}
+
+export function useGetVideoInteractionState(videoId: string) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<InteractionState>({
+    queryKey: ['videoInteractionState', videoId],
+    queryFn: async () => {
+      if (!actor) {
+        return { liked: false, disliked: false, saved: false };
+      }
+      try {
+        return await actor.getVideoInteractionState(videoId);
+      } catch (error: any) {
+        console.error('Error fetching interaction state:', error);
+        return { liked: false, disliked: false, saved: false };
+      }
+    },
+    enabled: !!actor && !isFetching && !!videoId,
+  });
+}
+
+export function useUpdateVideoInteraction() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ videoId, like, dislike, saved }: { videoId: string; like: boolean; dislike: boolean; saved: boolean }) => {
+      if (!actor) throw new Error('Not authenticated');
+      await actor.updateVideoInteraction({
+        videoId,
+        like,
+        dislike,
+        saved,
+      });
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate both summary and state for this video
+      queryClient.invalidateQueries({ queryKey: ['videoInteractionSummary', variables.videoId] });
+      queryClient.invalidateQueries({ queryKey: ['videoInteractionState', variables.videoId] });
+      // Also invalidate saved videos list
+      queryClient.invalidateQueries({ queryKey: ['savedVideos'] });
+    },
+  });
+}
+
+// Comments
+export function useGetCommentsForVideo(videoId: string) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Comment[]>({
+    queryKey: ['comments', videoId],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        const result: CommentsList = await actor.getCommentsForVideo(videoId, 0n, 100n);
+        return result.comments;
+      } catch (error: any) {
+        console.error('Error fetching comments:', error);
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching && !!videoId,
+  });
+}
+
+export function useAddComment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ videoId, text }: { videoId: string; text: string }) => {
+      if (!actor) throw new Error('Not authenticated');
+      return await actor.addComment(videoId, text);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate comments list and interaction summary (for comment count)
+      queryClient.invalidateQueries({ queryKey: ['comments', variables.videoId] });
+      queryClient.invalidateQueries({ queryKey: ['videoInteractionSummary', variables.videoId] });
+    },
+  });
+}
+
+// Saved Videos List
+export function useGetSavedVideos() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<VideoMetadata[]>({
+    queryKey: ['savedVideos'],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        // Get all videos
+        const allVideos = await actor.getVideoMetadataList();
+        
+        // Filter for saved videos by checking interaction state
+        const savedVideos: VideoMetadata[] = [];
+        for (const video of allVideos) {
+          try {
+            const state = await actor.getVideoInteractionState(video.id);
+            if (state.saved) {
+              savedVideos.push(video);
+            }
+          } catch (error) {
+            // Skip videos we can't check state for
+            continue;
+          }
+        }
+        
+        return savedVideos;
+      } catch (error: any) {
+        console.error('Error fetching saved videos:', error);
         return [];
       }
     },
@@ -109,10 +252,20 @@ export function useUploadShort() {
   return useMutation({
     mutationFn: async ({ title, videoUrl, duration, moods }: { title: string; videoUrl: string; duration: bigint; moods: Mood[] }) => {
       if (!actor) throw new Error('Not authenticated');
-      await actor.addShort(title, videoUrl, duration, moods);
+      try {
+        await actor.addShortUser(title, videoUrl, duration, moods);
+      } catch (error: any) {
+        // Normalize error messages for UI display
+        const message = error?.message || 'Failed to upload short. Please try again.';
+        if (message.includes('Unauthorized')) {
+          throw new Error('You must be signed in to upload shorts.');
+        }
+        throw new Error(message);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shorts'] });
+      queryClient.invalidateQueries({ queryKey: ['recommendedShorts'] });
     },
   });
 }
@@ -201,25 +354,16 @@ export function useGetCallerUserProfile() {
 }
 
 // User Profile - Any User (for viewing other profiles)
-export function useGetUserProfile(userId: string) {
-  const { actor, isFetching: actorFetching } = useActor();
+export function useGetUserProfile(user: Principal | null) {
+  const { actor, isFetching } = useActor();
 
   return useQuery<UserProfile | null>({
-    queryKey: ['userProfile', userId],
+    queryKey: ['userProfile', user?.toString()],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      try {
-        const principal = Principal.fromText(userId);
-        return await actor.getUserProfile(principal);
-      } catch (error: any) {
-        // If unauthorized or profile doesn't exist, return null
-        if (error.message?.includes('Unauthorized') || error.message?.includes('not found')) {
-          return null;
-        }
-        throw error;
-      }
+      if (!actor || !user) return null;
+      return actor.getUserProfile(user);
     },
-    enabled: !!actor && !actorFetching && !!userId,
+    enabled: !!actor && !isFetching && !!user,
     retry: false,
   });
 }
@@ -233,11 +377,8 @@ export function useSaveCallerUserProfile() {
       if (!actor) throw new Error('Not authenticated');
       await actor.saveCallerUserProfile(profile);
     },
-    onSuccess: (_, profile) => {
-      // Invalidate current user profile
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      // Also invalidate the viewed profile if it matches the caller
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
     },
   });
 }
