@@ -71,7 +71,7 @@ export default function Header() {
 
       {/* Mobile search dropdown - appears below header */}
       {showMobileSearch && (
-        <div className="absolute left-0 right-0 top-16 z-40 border-b border-border bg-card p-4 shadow-lg md:hidden">
+        <div className="absolute left-0 right-0 top-16 z-40 border-b border-border bg-[#1a1a1a] p-4 shadow-lg md:hidden">
           <form onSubmit={handleSearch} className="flex items-center gap-2">
             <div className="relative flex-1">
               <Input

@@ -1,57 +1,52 @@
 {
   "kind": "build_request",
-  "title": "Remove transparency behind user/profile bar dropdown (solid background)",
+  "title": "Set notifications dropdown background colors for light/dark mode",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
+      "text": "Update the notifications dropdown panel background so that it is #1a1a1a in dark mode and white (#ffffff) in light mode, applying the change only to the notifications dropdown surface (not the bell trigger button and not other dropdowns).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "uars bar ke peeche wala background transparent nhi dekhana chaheye yaar bhai jase photo me dekha ra hai vaise nhi dekhana chaheye",
-          "build karo"
+          "notifications bar Dropdown ka background color: #1a1a1a ... dark mood aur light mood ke liye light color",
+          "white"
         ]
       },
       "acceptanceCriteria": [
-        "When opening the ProfileMenu dropdown, the dropdown panel uses an opaque background color (no alpha/opacity and no backdrop blur/glass effect).",
-        "In dark mode, the dropdown panel appears as a solid dark surface; in light mode, it appears as a solid light surface.",
-        "Text/icons inside the dropdown remain readable and unchanged in layout/spacing."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "ab sem ayse he notifications bar karo bhi karo",
-          "ays a transparent nhi dekhana chaye yaar bhai"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When opening the Notifications dropdown, the dropdown panel and header area are fully opaque (no transparency/glass effect).",
-        "Unread highlighting (e.g., accent backgrounds) remains visible but does not make the overall dropdown appear transparent.",
-        "The dropdown remains aligned to the right and keeps its current width and scroll behavior."
+        "When the app theme is dark, the Notifications dropdown panel surface (DropdownMenuContent and its internal panel areas) renders with background #1a1a1a.",
+        "When the app theme is light, the Notifications dropdown panel surface renders with background #ffffff.",
+        "No other dropdown menus/components have their background colors changed as part of this update.",
+        "There are no hardcoded inline backgroundColor styles left that force #1a1a1a in light mode inside the notifications dropdown."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/components/ui (read-only UI component sources); implement styling fixes by adjusting component usage/classes in app components (e.g., ProfileMenu, NotificationsDropdown).",
-    "Backend logic must remain unchanged (this is a UI-only change)."
+    "Use English for any user-facing text.",
+    "Do not modify files under frontend/src/components/ui (compose them instead).",
+    "Keep changes limited to the notifications dropdown; do not alter global theme tokens in a way that affects other popovers/dropdowns."
   ],
   "nonGoals": [
-    "Implementing a backend notifications system (notifications are already client-side).",
-    "Changing navigation structure, adding new menu items, or altering authentication behavior."
+    "Changing hover/focus colors beyond what is required to support the requested background colors.",
+    "Updating the profile menu dropdown or mobile search dropdown (already separate).",
+    "Any backend changes."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

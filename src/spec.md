@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Remove the transparent/glass effect from the Profile and Notifications dropdown panels so the area behind them is not see-through.
+**Goal:** Ensure the Notifications dropdown panel surface uses correct background colors in light and dark themes without affecting other dropdowns.
 
 **Planned changes:**
-- Update Profile (user) dropdown styling so the dropdown panel uses a fully opaque background in both light and dark mode.
-- Update Notifications dropdown styling so the dropdown panel (including header area) uses the same fully opaque background treatment for consistency.
-- Ensure dropdown content (text/icons), spacing, alignment, width, and scroll behavior remain unchanged while removing transparency/backdrop blur effects.
+- Update the Notifications dropdown panel surface styling so its background is #1a1a1a in dark mode and #ffffff in light mode.
+- Scope the styling change to the Notifications dropdown content/panel only (not the bell trigger and not other dropdown menus).
+- Remove any inline/hardcoded backgroundColor styles within the Notifications dropdown that force #1a1a1a in light mode.
 
-**User-visible outcome:** When opening the Profile or Notifications dropdown from the top-right, the menus appear as solid (non-transparent) panels in both light and dark themes, with the same layout and readability as before.
+**User-visible outcome:** When opening the Notifications dropdown, its panel background is white in light mode and #1a1a1a in dark mode, with all other dropdowns unchanged.

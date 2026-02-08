@@ -2,28 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-make-the-profile-user-dropdown-menu-background-fully-opaque-no-transparency-glass-effect-matching-the-screenshot-issue-the-area-behind-the-user-bar-profile-dropdown-should-not-be-see-through",
-      "featureTitle": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
-      "files": [
-        "frontend/src/components/account/ProfileMenu.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-the-same-fully-opaque-background-treatment-to-the-notifications-dropdown-so-both-top-right-dropdowns-have-consistent-non-transparent-surfaces",
-      "featureTitle": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
+      "featureId": "feature-update-the-notifications-dropdown-panel-background-so-that-it-is-1a1a1a-in-dark-mode-and-white-ffffff-in-light-mode-applying-the-change-only-to-the-notifications-dropdown-surface-not-the-bell-trigger-button-and-not-other-dropdowns",
+      "featureTitle": "Update the notifications dropdown panel background so that it is #1a1a1a in dark mode and white (#ffffff) in light mode, applying the change only to the notifications dropdown surface (not the bell trigger button and not other dropdowns).",
       "files": [
         "frontend/src/components/notifications/NotificationsDropdown.tsx"
       ],
@@ -37,7 +17,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-1"
       ],
       "confidence": "high"
     }

@@ -1,14 +1,35 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T11:09:28.622Z",
-  "summary": "The diff applies UI-only class overrides to both ProfileMenu and NotificationsDropdown dropdown panels to remove the glass/transparent effect by setting an explicit background (bg-popover/text-popover-foreground) and disabling blur (backdrop-blur-none), including the Notifications header/empty states so the whole surface is opaque and consistent.",
+  "generatedAt": "2026-02-08T12:08:50.232Z",
+  "summary": "REQ-1 appears implemented within NotificationsDropdown by setting light/dark background classes on DropdownMenuContent and internal panel sections. However, the diff also includes unrelated metadata/documentation changes, and the updated frontend file summaries mention a mobile search dropdown background change, which would violate the scope constraint if it reflects a real code change (not verifiable from the provided modified files list).",
   "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.74,
+  "hallucinated_features": [
+    {
+      "description": "Updated project metadata/state tracking (project_state.json) unrelated to the requested UI change.",
+      "reason": "BuildRequest only asks for notifications dropdown background updates; it does not request changes to project tracking files.",
+      "evidence": [
+        "project_state.json"
+      ]
+    },
+    {
+      "description": "Updated repository file summaries (frontend-file-summaries.txt), including mention of other dropdown styling changes.",
+      "reason": "BuildRequest does not request regenerating/changing file summary documentation; additionally it references a mobile search dropdown background change, which is explicitly a non-goal if it reflects real UI changes.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Mobile search dropdown panel background described as changed to fixed #1a1a1a.",
+      "reason": "Non-goals explicitly state not to update the mobile search dropdown; the only evidence is the updated summary text, not an actual shown code diff.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.66,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/account/ProfileMenu.tsx",
     "frontend/src/components/notifications/NotificationsDropdown.tsx",
     "project_state.json"
   ]

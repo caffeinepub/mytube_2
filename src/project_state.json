@@ -2,23 +2,17 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [],
+  "architectural_notes": [
+    "Dropdown styling should be theme-aware (dark/light) and scoped to the dropdown component only."
+  ],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-make-the-profile-user-dropdown-menu-background-fully-opaque-no-transparency-glass-effect-matching-the-screenshot-issue-the-area-behind-the-user-bar-profile-dropdown-should-not-be-see-through",
-      "title": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
+      "id": "feature-update-the-notifications-dropdown-panel-background-so-that-it-is-1a1a1a-in-dark-mode-and-white-ffffff-in-light-mode-applying-the-change-only-to-the-notifications-dropdown-surface-not-the-bell-trigger-button-and-not-other-dropdowns",
+      "title": "Update the notifications dropdown panel background so that it is #1a1a1a in dark mode and white (#ffffff) in light mode, applying the change only to the notifications dropdown surface (not the bell trigger button and not other dropdowns).",
       "reqIds": [
         "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-the-same-fully-opaque-background-treatment-to-the-notifications-dropdown-so-both-top-right-dropdowns-have-consistent-non-transparent-surfaces",
-      "title": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
-      "reqIds": [
-        "REQ-2"
       ],
       "version": 1
     }
@@ -26,12 +20,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Remove transparency behind the user bar/user section background; use a solid dark background (no transparent look as in the photo).",
+      "summary": "Set notifications bar dropdown background color to #1a1a1a in dark mode and white in light mode (apply only to dropdown)",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Remove transparency behind user/profile bar dropdown (solid background)",
+  "projectName": "Set notifications dropdown background colors for light/dark mode",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,37 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Make header dropdown menus fully opaque (Profile + Notifications)",
+  "title": "Notifications dropdown panel background colors for light/dark mode",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make the ProfileMenu dropdown panel fully opaque in both light and dark themes without changing layout.",
+      "summary": "Set the Notifications dropdown panel surface background to #ffffff in light mode and #1a1a1a in dark mode without affecting the trigger button or other dropdowns.",
       "acceptanceCriteria": [
-        "When opening the ProfileMenu dropdown, the dropdown panel uses an opaque background color (no alpha/opacity and no backdrop blur/glass effect).",
-        "In dark mode, the dropdown panel appears as a solid dark surface; in light mode, it appears as a solid light surface.",
-        "Text/icons inside the dropdown remain readable and unchanged in layout/spacing."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/account/ProfileMenu.tsx",
-          "operation": "modify",
-          "description": "Update the shadcn-ui DropdownMenuContent usage to force a fully opaque surface (e.g., solid theme background via bg-popover/text-popover-foreground) and explicitly disable any glass effect (e.g., remove/override any backdrop blur / translucent utilities). Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Make the Notifications dropdown panel and header fully opaque while preserving unread highlighting, alignment, width, and scrolling.",
-      "acceptanceCriteria": [
-        "When opening the Notifications dropdown, the dropdown panel and header area are fully opaque (no transparency/glass effect).",
-        "Unread highlighting (e.g., accent backgrounds) remains visible but does not make the overall dropdown appear transparent.",
-        "The dropdown remains aligned to the right and keeps its current width and scroll behavior."
+        "When the app theme is dark, the Notifications dropdown panel surface (DropdownMenuContent and its internal panel areas) renders with background #1a1a1a.",
+        "When the app theme is light, the Notifications dropdown panel surface renders with background #ffffff.",
+        "No other dropdown menus/components have their background colors changed as part of this update.",
+        "There are no hardcoded inline backgroundColor styles left that force #1a1a1a in light mode inside the notifications dropdown."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
           "operation": "modify",
-          "description": "Update the shadcn-ui DropdownMenuContent usage to apply a solid opaque surface for the entire dropdown (including the header area) using theme tokens (e.g., bg-popover/text-popover-foreground) and explicitly disable any blur/translucent utilities; keep existing w-80, p-0, align=end, and ScrollArea behavior unchanged. Verify the component's usage instructions before implementing."
+          "description": "Remove inline backgroundColor styles that currently force a dark background, and apply local Tailwind classes to only the notifications dropdown surface: set DropdownMenuContent to use bg-[#ffffff] in light mode and dark:bg-[#1a1a1a] in dark mode. Ensure internal wrapper sections (header, empty states, ScrollArea container, list wrapper) inherit or explicitly use the same light/dark background classes so the entire panel surface matches, while keeping the bell trigger button styling unchanged and not modifying any other dropdown implementations."
         }
       ]
     }
