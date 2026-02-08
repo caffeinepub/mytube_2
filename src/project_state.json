@@ -1,24 +1,22 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "UI task: adjust the tab bar background strip behind the icons to a slightly darker shade (#1a1a1a).",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Reported that the previous tab bar strip color change was not visible/applied in the provided photo."
-  ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-mobile-bottom-navigation-bar-container-the-strip-behind-the-icons-to-use-a-clearly-visible-non-transparent-background-color-of-1a1a1a-while-keeping-the-existing-per-button-background-styling-and-active-state-highlight-behavior-unchanged",
-      "title": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
+      "id": "feature-make-the-profile-user-dropdown-menu-background-fully-opaque-no-transparency-glass-effect-matching-the-screenshot-issue-the-area-behind-the-user-bar-profile-dropdown-should-not-be-see-through",
+      "title": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-the-styling-implementation-so-the-bottom-tab-bar-background-color-change-reliably-applies-i-e-ensure-the-tailwind-color-token-used-by-bottomnav-resolves-to-the-intended-color-instead-of-being-ignored-due-to-incompatible-css-variable-formatting",
-      "title": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+      "id": "feature-apply-the-same-fully-opaque-background-treatment-to-the-notifications-dropdown-so-both-top-right-dropdowns-have-consistent-non-transparent-surfaces",
+      "title": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
       "reqIds": [
         "REQ-2"
       ],
@@ -28,12 +26,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Change the bottom tab bar background strip behind the icons to a slightly darker shade (#1a1a1a).",
+      "summary": "Remove transparency behind the user bar/user section background; use a solid dark background (no transparent look as in the photo).",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Make mobile bottom tab bar strip background #1a1a1a",
+  "projectName": "Remove transparency behind user/profile bar dropdown (solid background)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

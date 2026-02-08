@@ -1,42 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Mobile bottom tab bar strip background #1a1a1a",
+  "title": "Make header dropdown menus fully opaque (Profile + Notifications)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make the mobile BottomNav strip behind icons use a solid #1a1a1a background while keeping button and active-state styling unchanged.",
+      "summary": "Make the ProfileMenu dropdown panel fully opaque in both light and dark themes without changing layout.",
       "acceptanceCriteria": [
-        "On mobile (md:hidden BottomNav), the bar behind the icons renders with background color #1a1a1a (visibly darker than before).",
-        "The icon/button backgrounds (bg-bottom-nav-button) remain the same as before.",
-        "Active tab styling remains the same as before (active text-primary and icon fill-primary).",
-        "The background color is not transparent and is visually consistent across routes."
+        "When opening the ProfileMenu dropdown, the dropdown panel uses an opaque background color (no alpha/opacity and no backdrop blur/glass effect).",
+        "In dark mode, the dropdown panel appears as a solid dark surface; in light mode, it appears as a solid light surface.",
+        "Text/icons inside the dropdown remain readable and unchanged in layout/spacing."
       ],
       "file_operations": [
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/account/ProfileMenu.tsx",
           "operation": "modify",
-          "description": "Update the Tailwind color token for 'bottom-nav-bar' so 'bg-bottom-nav-bar' resolves to a solid #1a1a1a (without changing 'bottom-nav-button' or active-state related tokens)."
-        },
-        {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "modify",
-          "description": "Confirm the BottomNav container continues to use the existing 'bg-bottom-nav-bar' class and that per-button background and active-state classes remain unchanged after the color token update."
+          "description": "Update the shadcn-ui DropdownMenuContent usage to force a fully opaque surface (e.g., solid theme background via bg-popover/text-popover-foreground) and explicitly disable any glass effect (e.g., remove/override any backdrop blur / translucent utilities). Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Fix BottomNav background styling reliability by ensuring the Tailwind token used for the bar background resolves correctly (not ignored due to CSS variable formatting).",
+      "summary": "Make the Notifications dropdown panel and header fully opaque while preserving unread highlighting, alignment, width, and scrolling.",
       "acceptanceCriteria": [
-        "After implementation, changing the bottom-nav bar color results in an observable UI difference in the running app (not just in code).",
-        "No regressions to other theme colors outside the bottom navigation bar strip."
+        "When opening the Notifications dropdown, the dropdown panel and header area are fully opaque (no transparency/glass effect).",
+        "Unread highlighting (e.g., accent backgrounds) remains visible but does not make the overall dropdown appear transparent.",
+        "The dropdown remains aligned to the right and keeps its current width and scroll behavior."
       ],
       "file_operations": [
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/notifications/NotificationsDropdown.tsx",
           "operation": "modify",
-          "description": "Replace the current CSS-variable-based definition for the 'bottom-nav-bar' Tailwind color with a compatible value format (e.g., a direct hex color) so Tailwind-generated 'bg-bottom-nav-bar' styles are applied reliably, without altering other theme tokens."
+          "description": "Update the shadcn-ui DropdownMenuContent usage to apply a solid opaque surface for the entire dropdown (including the header area) using theme tokens (e.g., bg-popover/text-popover-foreground) and explicitly disable any blur/translucent utilities; keep existing w-80, p-0, align=end, and ScrollArea behavior unchanged. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-mobile-bottom-navigation-bar-container-the-strip-behind-the-icons-to-use-a-clearly-visible-non-transparent-background-color-of-1a1a1a-while-keeping-the-existing-per-button-background-styling-and-active-state-highlight-behavior-unchanged",
-      "featureTitle": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
+      "featureId": "feature-make-the-profile-user-dropdown-menu-background-fully-opaque-no-transparency-glass-effect-matching-the-screenshot-issue-the-area-behind-the-user-bar-profile-dropdown-should-not-be-see-through",
+      "featureTitle": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
       "files": [
-        "frontend/tailwind.config.js"
+        "frontend/src/components/account/ProfileMenu.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,10 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-the-styling-implementation-so-the-bottom-tab-bar-background-color-change-reliably-applies-i-e-ensure-the-tailwind-color-token-used-by-bottomnav-resolves-to-the-intended-color-instead-of-being-ignored-due-to-incompatible-css-variable-formatting",
-      "featureTitle": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+      "featureId": "feature-apply-the-same-fully-opaque-background-treatment-to-the-notifications-dropdown-so-both-top-right-dropdowns-have-consistent-non-transparent-surfaces",
+      "featureTitle": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
       "files": [
-        "frontend/tailwind.config.js"
+        "frontend/src/components/notifications/NotificationsDropdown.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",

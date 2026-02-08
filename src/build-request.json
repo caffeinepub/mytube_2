@@ -1,69 +1,57 @@
 {
   "kind": "build_request",
-  "title": "Make mobile bottom tab bar strip background #1a1a1a",
+  "title": "Remove transparency behind user/profile bar dropdown (solid background)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
+      "text": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8"
+          "recent-messages"
         ],
         "quotes": [
-          "1. #1a1a1a.  2. neeche icons ke peeche wali background strip.  3. halka shade change",
+          "uars bar ke peeche wala background transparent nhi dekhana chaheye yaar bhai jase photo me dekha ra hai vaise nhi dekhana chaheye",
           "build karo"
         ]
       },
       "acceptanceCriteria": [
-        "On mobile (md:hidden BottomNav), the bar behind the icons renders with background color #1a1a1a (visibly darker than before).",
-        "The icon/button backgrounds (bg-bottom-nav-button) remain the same as before.",
-        "Active tab styling remains the same as before (active text-primary and icon fill-primary).",
-        "The background color is not transparent and is visually consistent across routes."
+        "When opening the ProfileMenu dropdown, the dropdown panel uses an opaque background color (no alpha/opacity and no backdrop blur/glass effect).",
+        "In dark mode, the dropdown panel appears as a solid dark surface; in light mode, it appears as a solid light surface.",
+        "Text/icons inside the dropdown remain readable and unchanged in layout/spacing."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+      "text": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5",
-          "msg-8"
+          "recent-messages"
         ],
         "quotes": [
-          "KAHA HU KUCH BHI NHI HU TAB BAR KE STRIP ME KUCH BHI CHANGE NHI CHANGE DEKHA RAHA HAI TUME PHOTO ME KUCH BHI CHANGE NHI HUVA HAI",
-          "1. #1a1a1a.  2. neeche icons ke peeche wali background strip.  3. halka shade change"
+          "ab sem ayse he notifications bar karo bhi karo",
+          "ays a transparent nhi dekhana chaye yaar bhai"
         ]
       },
       "acceptanceCriteria": [
-        "After implementation, changing the bottom-nav bar color results in an observable UI difference in the running app (not just in code).",
-        "No regressions to other theme colors outside the bottom navigation bar strip."
+        "When opening the Notifications dropdown, the dropdown panel and header area are fully opaque (no transparency/glass effect).",
+        "Unread highlighting (e.g., accent backgrounds) remains visible but does not make the overall dropdown appear transparent.",
+        "The dropdown remains aligned to the right and keeps its current width and scroll behavior."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain unchanged (no canister changes required).",
-    "Do not edit any files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT."
+    "Do not modify any files under frontend/src/components/ui (read-only UI component sources); implement styling fixes by adjusting component usage/classes in app components (e.g., ProfileMenu, NotificationsDropdown).",
+    "Backend logic must remain unchanged (this is a UI-only change)."
   ],
   "nonGoals": [
-    "Redesigning the entire theme or changing primary/secondary colors.",
-    "Changing BottomNav layout, labels, routes, or icon set.",
-    "Adding new navigation items or new pages."
+    "Implementing a backend notifications system (notifications are already client-side).",
+    "Changing navigation structure, adding new menu items, or altering authentication behavior."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

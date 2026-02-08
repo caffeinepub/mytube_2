@@ -56,7 +56,7 @@ export default function ProfileMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 bg-popover text-popover-foreground backdrop-blur-none">
         <div className="flex items-center gap-2 px-2 py-2">
           <Avatar className="h-10 w-10">
             {userProfile?.profilePhotoUrl && (

@@ -54,8 +54,8 @@ export default function NotificationsDropdown() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <DropdownMenuContent align="end" className="w-80 p-0 bg-popover text-popover-foreground backdrop-blur-none">
+        <div className="flex items-center justify-between border-b border-border bg-popover px-4 py-3">
           <h3 className="font-semibold">Notifications</h3>
           {isSignedIn && unreadCount > 0 && (
             <Button
@@ -70,21 +70,21 @@ export default function NotificationsDropdown() {
         </div>
         
         {!isSignedIn ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center bg-popover">
             <Bell className="h-12 w-12 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
               Sign in to see your notifications
             </p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center bg-popover">
             <Bell className="h-12 w-12 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
               No notifications yet
             </p>
           </div>
         ) : (
-          <ScrollArea className="max-h-[400px]">
+          <ScrollArea className="max-h-[400px] bg-popover">
             <div className="py-1">
               {notifications.map((notification) => (
                 <DropdownMenuItem

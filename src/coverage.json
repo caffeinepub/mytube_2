@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T10:18:20.560Z",
+  "generatedAt": "2026-02-08T11:09:28.625Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,25 +12,24 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the mobile bottom navigation bar container (the strip behind the icons) to use a clearly visible, non-transparent background color of #1a1a1a while keeping the existing per-button background styling and active-state highlight behavior unchanged.",
+        "summary": "Make the Profile (user) dropdown menu background fully opaque (no transparency/glass effect), matching the screenshot issue: the area behind the user bar/profile dropdown should not be see-through.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/tailwind.config.js",
-          "frontend/src/components/BottomNav.tsx"
+          "frontend/src/components/account/ProfileMenu.tsx"
         ],
         "matchedFiles": [
-          "frontend/tailwind.config.js"
+          "frontend/src/components/account/ProfileMenu.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Fix the styling implementation so the bottom tab bar background color change reliably applies (i.e., ensure the Tailwind color token used by BottomNav resolves to the intended color instead of being ignored due to incompatible CSS variable formatting).",
+        "summary": "Apply the same fully opaque background treatment to the Notifications dropdown so both top-right dropdowns have consistent non-transparent surfaces.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/tailwind.config.js"
+          "frontend/src/components/notifications/NotificationsDropdown.tsx"
         ],
         "matchedFiles": [
-          "frontend/tailwind.config.js"
+          "frontend/src/components/notifications/NotificationsDropdown.tsx"
         ]
       }
     ]
@@ -40,7 +39,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/account/ProfileMenu.tsx",
+    "frontend/src/components/notifications/NotificationsDropdown.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

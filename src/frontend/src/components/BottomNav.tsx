@@ -25,14 +25,9 @@ export default function BottomNav() {
           <Link
             key={item.path}
             to={item.path}
-            className={cn(
-              'flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors bg-bottom-nav-button',
-              isActive
-                ? 'text-primary'
-                : 'text-muted-foreground'
-            )}
+            className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors bg-bottom-nav-button text-white"
           >
-            <Icon className={cn('h-5 w-5', isActive && 'fill-primary')} />
+            <Icon className="h-5 w-5 fill-white" />
             <span className="text-[10px]">{item.label}</span>
           </Link>
         );

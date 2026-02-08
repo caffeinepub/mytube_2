@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make the mobile bottom tab bar strip (container behind the icons) use a clearly visible, non-transparent #1a1a1a background, and ensure the change reliably applies.
+**Goal:** Remove the transparent/glass effect from the Profile and Notifications dropdown panels so the area behind them is not see-through.
 
 **Planned changes:**
-- Update the md:hidden BottomNav container/strip styling to render with background color #1a1a1a while keeping existing per-button background styling unchanged.
-- Preserve existing active tab highlight behavior (active text-primary and icon fill-primary).
-- Fix the styling/token usage so the BottomNav background color is not ignored (e.g., due to incompatible CSS variable formatting) and remains consistent across routes.
+- Update Profile (user) dropdown styling so the dropdown panel uses a fully opaque background in both light and dark mode.
+- Update Notifications dropdown styling so the dropdown panel (including header area) uses the same fully opaque background treatment for consistency.
+- Ensure dropdown content (text/icons), spacing, alignment, width, and scroll behavior remain unchanged while removing transparency/backdrop blur effects.
 
-**User-visible outcome:** On mobile, the bottom navigation strip behind the icons is visibly darker (#1a1a1a) and consistently applied on all pages, while button and active-state styling stays the same.
+**User-visible outcome:** When opening the Profile or Notifications dropdown from the top-right, the menus appear as solid (non-transparent) panels in both light and dark themes, with the same layout and readability as before.
